@@ -59,11 +59,11 @@ export default function SubmitACamp() {
       <Layout title="Camp Submitted | Camp Collective ATX">
         <div className="max-w-xl mx-auto px-4 py-20 text-center">
           <div className="text-5xl mb-4">🎉</div>
-          <h1 className="font-display text-3xl font-bold text-brand-navy mb-3">Thanks for submitting!</h1>
+          <h1 className="font-display text-3xl font-bold text-brand-ink mb-3">Thanks for submitting!</h1>
           <p className="text-gray-600 mb-8">
             We'll review your submission and add it to the directory within 2 business days.
           </p>
-          <a href="/camps" className="px-6 py-3 bg-brand-terracotta text-white font-semibold rounded-xl hover:bg-opacity-90">
+          <a href="/camps" className="px-6 py-3 bg-brand-coral text-white font-semibold rounded-xl hover:bg-opacity-90">
             Browse All Camps
           </a>
         </div>
@@ -77,7 +77,7 @@ export default function SubmitACamp() {
       description="Is your Austin summer camp missing from our directory? Submit it here and we'll add it within 2 business days. Listings are always free."
     >
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
-        <h1 className="font-display text-3xl sm:text-4xl font-bold text-brand-navy mb-2">
+        <h1 className="font-display text-3xl sm:text-4xl font-bold text-brand-ink mb-2">
           Submit a Camp
         </h1>
         <p className="text-gray-600 mb-10">
@@ -86,8 +86,8 @@ export default function SubmitACamp() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-brand-navy mb-1">
-              Camp Name <span className="text-brand-terracotta">*</span>
+            <label className="block text-sm font-medium text-brand-ink mb-1">
+              Camp Name <span className="text-brand-coral">*</span>
             </label>
             <input
               type="text"
@@ -95,34 +95,34 @@ export default function SubmitACamp() {
               required
               value={form.name}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-terracotta text-brand-navy"
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-coral text-brand-ink"
               placeholder="e.g. Barton Springs Summer Camp"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-brand-navy mb-1">Camp Website</label>
+            <label className="block text-sm font-medium text-brand-ink mb-1">Camp Website</label>
             <input
               type="url"
               name="url"
               value={form.url}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-terracotta text-brand-navy"
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-coral text-brand-ink"
               placeholder="https://www.yourcamp.com"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-medium text-brand-navy mb-1">
-                Category <span className="text-brand-terracotta">*</span>
+              <label className="block text-sm font-medium text-brand-ink mb-1">
+                Category <span className="text-brand-coral">*</span>
               </label>
               <select
                 name="category"
                 required
                 value={form.category}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-brand-terracotta text-brand-navy"
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-brand-coral text-brand-ink"
               >
                 <option value="">Select a category</option>
                 {CATEGORIES.map((cat) => (
@@ -131,15 +131,15 @@ export default function SubmitACamp() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-brand-navy mb-1">
-                City <span className="text-brand-terracotta">*</span>
+              <label className="block text-sm font-medium text-brand-ink mb-1">
+                City <span className="text-brand-coral">*</span>
               </label>
               <select
                 name="city"
                 required
                 value={form.city}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-brand-terracotta text-brand-navy"
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-brand-coral text-brand-ink"
               >
                 <option value="">Select a city</option>
                 {CITIES.map((c) => (
@@ -150,45 +150,45 @@ export default function SubmitACamp() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-brand-navy mb-1">Description</label>
+            <label className="block text-sm font-medium text-brand-ink mb-1">Description</label>
             <textarea
               name="description"
               rows={3}
               value={form.description}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-terracotta text-brand-navy resize-none"
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-coral text-brand-ink resize-none"
               placeholder="2–3 sentences about the camp and what makes it special."
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-medium text-brand-navy mb-1">Price Range</label>
+              <label className="block text-sm font-medium text-brand-ink mb-1">Price Range</label>
               <input
                 type="text"
                 name="priceRange"
                 value={form.priceRange}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-terracotta text-brand-navy"
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-coral text-brand-ink"
                 placeholder="e.g. $275/week"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-brand-navy mb-1">Hours</label>
+              <label className="block text-sm font-medium text-brand-ink mb-1">Hours</label>
               <input
                 type="text"
                 name="hours"
                 value={form.hours}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-terracotta text-brand-navy"
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-coral text-brand-ink"
                 placeholder="e.g. 9am–4pm Mon–Fri"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-brand-navy mb-1">
-              Your Email <span className="text-brand-terracotta">*</span>
+            <label className="block text-sm font-medium text-brand-ink mb-1">
+              Your Email <span className="text-brand-coral">*</span>
             </label>
             <input
               type="email"
@@ -196,19 +196,19 @@ export default function SubmitACamp() {
               required
               value={form.email}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-terracotta text-brand-navy"
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-coral text-brand-ink"
               placeholder="For follow-up only, won't be published"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-brand-navy mb-1">Anything else we should know?</label>
+            <label className="block text-sm font-medium text-brand-ink mb-1">Anything else we should know?</label>
             <textarea
               name="notes"
               rows={2}
               value={form.notes}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-terracotta text-brand-navy resize-none"
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-coral text-brand-ink resize-none"
             />
           </div>
 
@@ -219,7 +219,7 @@ export default function SubmitACamp() {
           <button
             type="submit"
             disabled={status === 'loading'}
-            className="w-full py-3 bg-brand-terracotta text-white font-semibold rounded-xl hover:bg-opacity-90 transition-colors disabled:opacity-60"
+            className="w-full py-3 bg-brand-coral text-white font-semibold rounded-xl hover:bg-opacity-90 transition-colors disabled:opacity-60"
           >
             {status === 'loading' ? 'Submitting...' : 'Submit Camp'}
           </button>

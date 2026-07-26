@@ -12,14 +12,14 @@ export default function CityPage({ camps, cityName }) {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <nav className="text-sm text-gray-500 mb-6">
-          <Link href="/" className="hover:text-brand-terracotta">Home</Link>
+          <Link href="/" className="hover:text-brand-coral">Home</Link>
           <span className="mx-1.5">/</span>
-          <Link href="/camps" className="hover:text-brand-terracotta">Camps</Link>
+          <Link href="/camps" className="hover:text-brand-coral">Camps</Link>
           <span className="mx-1.5">/</span>
-          <span className="text-brand-navy font-medium">{cityName}</span>
+          <span className="text-brand-ink font-medium">{cityName}</span>
         </nav>
 
-        <h1 className="font-display text-3xl sm:text-4xl font-bold text-brand-navy mb-2">
+        <h1 className="font-display text-3xl sm:text-4xl font-bold text-brand-ink mb-2">
           Summer Camps in {cityName}, TX
         </h1>
         <p className="text-gray-600 mb-10">
@@ -35,7 +35,7 @@ export default function CityPage({ camps, cityName }) {
         ) : (
           <div className="text-center py-20">
             <p className="text-gray-500">No camps found in {cityName} yet.</p>
-            <Link href="/camps" className="mt-4 inline-block text-brand-terracotta hover:underline">
+            <Link href="/camps" className="mt-4 inline-block text-brand-coral hover:underline">
               Browse all camps →
             </Link>
           </div>

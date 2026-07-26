@@ -38,7 +38,7 @@ export default function Layout({ children, title, description, ogImage, canonica
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="min-h-screen flex flex-col bg-brand-cream">
+      <div className="min-h-screen flex flex-col bg-brand-paper">
         <Header />
         <main className="flex-grow">{children}</main>
         <Footer />

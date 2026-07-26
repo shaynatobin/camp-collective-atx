@@ -2,6 +2,48 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 
+function LogoMark({ size = 40 }) {
+  const s = size / 40
+  return (
+    <div className="relative flex-shrink-0" style={{ width: 40 * s, height: 34 * s }}>
+      {/* Sun circle — sits behind peaks, peeks above */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: 14 * s,
+        height: 14 * s,
+        borderRadius: '50%',
+        backgroundColor: '#F2C14E',
+        zIndex: 1,
+      }} />
+      {/* Back peak — forest green */}
+      <div style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        width: 32 * s,
+        height: 24 * s,
+        clipPath: 'polygon(50% 0%, 100% 100%, 0% 100%)',
+        backgroundColor: '#3B6E52',
+        zIndex: 2,
+      }} />
+      {/* Front peak — coral */}
+      <div style={{
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        width: 26 * s,
+        height: 20 * s,
+        clipPath: 'polygon(50% 0%, 100% 100%, 0% 100%)',
+        backgroundColor: '#E8794A',
+        zIndex: 3,
+      }} />
+    </div>
+  )
+}
+
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const router = useRouter()
@@ -13,14 +55,14 @@ export default function Header() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 bg-brand-cream border-b border-gray-200 shadow-sm">
+    <header className="sticky top-0 z-50 bg-brand-paper border-b border-brand-border shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <span className="font-display font-bold text-xl text-brand-navy tracking-tight">
-              Camp Collective
-              <span className="text-brand-terracotta"> ATX</span>
+          <Link href="/" className="flex items-center gap-2.5">
+            <LogoMark size={40} />
+            <span className="font-display font-semibold text-xl text-brand-ink leading-none">
+              Camp Collective<span className="text-brand-coral"> ATX</span>
             </span>
           </Link>
 
@@ -32,8 +74,8 @@ export default function Header() {
                 href={link.href}
                 className={`text-sm font-medium transition-colors duration-150 ${
                   router.pathname.startsWith(link.href)
-                    ? 'text-brand-terracotta'
-                    : 'text-brand-navy hover:text-brand-terracotta'
+                    ? 'text-brand-coral'
+                    : 'text-brand-ink hover:text-brand-coral'
                 }`}
               >
                 {link.label}
@@ -41,7 +83,7 @@ export default function Header() {
             ))}
             <Link
               href="/submit-a-camp"
-              className="ml-2 px-4 py-2 bg-brand-terracotta text-white text-sm font-medium rounded-lg hover:bg-opacity-90 transition-colors duration-150"
+              className="ml-2 px-4 py-2 bg-brand-coral text-white text-sm font-medium rounded-[10px] hover:bg-brand-coral-dark transition-colors duration-150"
             >
               List Your Camp
             </Link>
@@ -49,7 +91,7 @@ export default function Header() {
 
           {/* Mobile hamburger */}
           <button
-            className="md:hidden p-2 rounded-lg text-brand-navy hover:bg-gray-100"
+            className="md:hidden p-2 rounded-lg text-brand-ink hover:bg-brand-cream"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle menu"
           >
@@ -68,12 +110,12 @@ export default function Header() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="md:hidden border-t border-gray-200 bg-brand-cream px-4 py-3 space-y-2">
+        <div className="md:hidden border-t border-brand-border bg-brand-paper px-4 py-3 space-y-2">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="block py-2 text-sm font-medium text-brand-navy hover:text-brand-terracotta"
+              className="block py-2 text-sm font-medium text-brand-ink hover:text-brand-coral"
               onClick={() => setMenuOpen(false)}
             >
               {link.label}
@@ -81,7 +123,7 @@ export default function Header() {
           ))}
           <Link
             href="/submit-a-camp"
-            className="block mt-2 px-4 py-2 bg-brand-terracotta text-white text-sm font-medium rounded-lg text-center"
+            className="block mt-2 px-4 py-2 bg-brand-coral text-white text-sm font-medium rounded-[10px] text-center"
             onClick={() => setMenuOpen(false)}
           >
             List Your Camp

@@ -7,7 +7,7 @@ export default function CampCard({ camp }) {
   const gradient = getCategoryGradient(camp.category)
 
   return (
-    <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col">
+    <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col">
       {/* Photo or gradient placeholder */}
       <div className="relative w-full h-44 flex-shrink-0">
         {camp.photo ? (
@@ -37,11 +37,11 @@ export default function CampCard({ camp }) {
           <CategoryBadge category={camp.category} />
         </div>
 
-        <h3 className="font-display font-semibold text-brand-navy text-lg leading-snug mb-1 line-clamp-2">
+        <h3 className="font-display font-semibold text-brand-ink text-lg leading-snug mb-1 line-clamp-2">
           {camp.name}
         </h3>
 
-        <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+        <div className="flex items-center gap-2 text-sm text-brand-ink-soft mb-2">
           {camp.city && <span>📍 {camp.city}, TX</span>}
           {camp.priceRange && (
             <>
@@ -52,7 +52,7 @@ export default function CampCard({ camp }) {
         </div>
 
         {camp.description && (
-          <p className="text-sm text-gray-600 line-clamp-2 mb-4 flex-grow">
+          <p className="text-sm text-brand-ink-soft line-clamp-2 mb-4 flex-grow">
             {camp.description}
           </p>
         )}
@@ -61,7 +61,7 @@ export default function CampCard({ camp }) {
         <div className="flex gap-2 mt-auto pt-2">
           <Link
             href={`/camps/${camp.slug}`}
-            className="flex-1 text-center text-sm font-medium text-brand-terracotta border border-brand-terracotta rounded-lg py-1.5 hover:bg-brand-terracotta hover:text-white transition-colors duration-150"
+            className="flex-1 text-center text-sm font-medium text-brand-coral border border-brand-coral rounded-[10px] py-1.5 hover:bg-brand-coral hover:text-white transition-colors duration-150"
           >
             View Details
           </Link>
@@ -70,7 +70,7 @@ export default function CampCard({ camp }) {
               href={camp.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 text-center text-sm font-medium bg-brand-terracotta text-white rounded-lg py-1.5 hover:bg-opacity-90 transition-colors duration-150"
+              className="flex-1 text-center text-sm font-medium bg-brand-coral text-white rounded-[10px] py-1.5 hover:bg-brand-coral-dark transition-colors duration-150"
             >
               Visit Site →
             </a>

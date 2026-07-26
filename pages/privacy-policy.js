@@ -7,13 +7,13 @@ export default function PrivacyPolicy() {
       description="Privacy Policy for Camp Collective ATX — how we collect, use, and protect your information."
     >
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-14">
-        <h1 className="font-display text-3xl sm:text-4xl font-bold text-brand-navy mb-2">Privacy Policy</h1>
+        <h1 className="font-display text-3xl sm:text-4xl font-bold text-brand-ink mb-2">Privacy Policy</h1>
         <p className="text-sm text-gray-500 mb-10">Effective Date: July 2, 2026</p>
 
         <div className="prose prose-slate max-w-none space-y-8 text-gray-700">
 
           <section>
-            <h2 className="font-display text-xl font-bold text-brand-navy mb-3">1. Introduction</h2>
+            <h2 className="font-display text-xl font-bold text-brand-ink mb-3">1. Introduction</h2>
             <p>
               Camp Collective ATX ("we," "us," or "our") is operated by Shane and Shayna Tobin in Austin, Texas.
               This Privacy Policy explains how we collect, use, and protect information when you visit{' '}
@@ -26,7 +26,7 @@ export default function PrivacyPolicy() {
           </section>
 
           <section>
-            <h2 className="font-display text-xl font-bold text-brand-navy mb-3">2. Information We Collect</h2>
+            <h2 className="font-display text-xl font-bold text-brand-ink mb-3">2. Information We Collect</h2>
             <p><strong>Information you provide directly:</strong></p>
             <ul className="list-disc pl-5 space-y-1">
               <li>Your name and email address when you submit a camp listing or contact us</li>
@@ -46,7 +46,7 @@ export default function PrivacyPolicy() {
           </section>
 
           <section>
-            <h2 className="font-display text-xl font-bold text-brand-navy mb-3">3. How We Use Your Information</h2>
+            <h2 className="font-display text-xl font-bold text-brand-ink mb-3">3. How We Use Your Information</h2>
             <ul className="list-disc pl-5 space-y-1">
               <li>To process and respond to camp submission requests</li>
               <li>To respond to messages or questions you send us</li>
@@ -59,7 +59,7 @@ export default function PrivacyPolicy() {
           </section>
 
           <section>
-            <h2 className="font-display text-xl font-bold text-brand-navy mb-3">4. Camp Listing Data</h2>
+            <h2 className="font-display text-xl font-bold text-brand-ink mb-3">4. Camp Listing Data</h2>
             <p>
               Camp information displayed on this Site (camp names, addresses, phone numbers, websites,
               descriptions, and schedules) is sourced from publicly available information and voluntary
@@ -69,18 +69,18 @@ export default function PrivacyPolicy() {
           </section>
 
           <section>
-            <h2 className="font-display text-xl font-bold text-brand-navy mb-3">5. Third-Party Services</h2>
+            <h2 className="font-display text-xl font-bold text-brand-ink mb-3">5. Third-Party Services</h2>
             <p>We use the following third-party services to operate this Site:</p>
             <ul className="list-disc pl-5 space-y-1">
               <li>
                 <strong>Airtable</strong> — stores our camp database and form submissions.{' '}
-                <a href="https://www.airtable.com/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-terracotta underline">
+                <a href="https://www.airtable.com/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-coral underline">
                   Airtable Privacy Policy
                 </a>
               </li>
               <li>
                 <strong>Vercel</strong> — hosts the Site.{' '}
-                <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-brand-terracotta underline">
+                <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-brand-coral underline">
                   Vercel Privacy Policy
                 </a>
               </li>
@@ -91,12 +91,12 @@ export default function PrivacyPolicy() {
           </section>
 
           <section>
-            <h2 className="font-display text-xl font-bold text-brand-navy mb-3">6. Children's Privacy</h2>
+            <h2 className="font-display text-xl font-bold text-brand-ink mb-3">6. Children's Privacy</h2>
             <p>
               This Site is directed at parents and adults seeking summer camp information for their children.
               We do not knowingly collect personal information from children under the age of 13. If you
               believe that a child under 13 has submitted personal information to us, please contact us at{' '}
-              <a href="mailto:shayna.tobin@gmail.com" className="text-brand-terracotta underline">
+              <a href="mailto:shayna.tobin@gmail.com" className="text-brand-coral underline">
                 shayna.tobin@gmail.com
               </a>{' '}
               and we will promptly delete it.
@@ -104,7 +104,7 @@ export default function PrivacyPolicy() {
           </section>
 
           <section>
-            <h2 className="font-display text-xl font-bold text-brand-navy mb-3">7. Your Rights (Texas Residents)</h2>
+            <h2 className="font-display text-xl font-bold text-brand-ink mb-3">7. Your Rights (Texas Residents)</h2>
             <p>
               Under the Texas Data Privacy and Security Act (TDPSA), Texas residents have the right to:
             </p>
@@ -116,7 +116,7 @@ export default function PrivacyPolicy() {
             </ul>
             <p className="mt-3">
               To exercise any of these rights, please contact us at{' '}
-              <a href="mailto:shayna.tobin@gmail.com" className="text-brand-terracotta underline">
+              <a href="mailto:shayna.tobin@gmail.com" className="text-brand-coral underline">
                 shayna.tobin@gmail.com
               </a>
               . We will respond within 45 days.
@@ -124,7 +124,7 @@ export default function PrivacyPolicy() {
           </section>
 
           <section>
-            <h2 className="font-display text-xl font-bold text-brand-navy mb-3">8. Data Retention</h2>
+            <h2 className="font-display text-xl font-bold text-brand-ink mb-3">8. Data Retention</h2>
             <p>
               We retain personal information (such as camp submission emails) only as long as necessary to
               fulfill the purpose for which it was collected, and then delete it. Camp listing data sourced
@@ -133,7 +133,7 @@ export default function PrivacyPolicy() {
           </section>
 
           <section>
-            <h2 className="font-display text-xl font-bold text-brand-navy mb-3">9. Security</h2>
+            <h2 className="font-display text-xl font-bold text-brand-ink mb-3">9. Security</h2>
             <p>
               We use industry-standard security measures to protect your information, including HTTPS
               encryption for all data transmitted to and from the Site. However, no method of electronic
@@ -142,7 +142,7 @@ export default function PrivacyPolicy() {
           </section>
 
           <section>
-            <h2 className="font-display text-xl font-bold text-brand-navy mb-3">10. Changes to This Policy</h2>
+            <h2 className="font-display text-xl font-bold text-brand-ink mb-3">10. Changes to This Policy</h2>
             <p>
               We may update this Privacy Policy from time to time. When we do, we will update the
               "Effective Date" at the top of this page. Material changes will be noted prominently.
@@ -151,10 +151,10 @@ export default function PrivacyPolicy() {
           </section>
 
           <section>
-            <h2 className="font-display text-xl font-bold text-brand-navy mb-3">11. Contact Us</h2>
+            <h2 className="font-display text-xl font-bold text-brand-ink mb-3">11. Contact Us</h2>
             <p>
               Questions about this Privacy Policy? Contact us at:{' '}
-              <a href="mailto:shayna.tobin@gmail.com" className="text-brand-terracotta underline">
+              <a href="mailto:shayna.tobin@gmail.com" className="text-brand-coral underline">
                 shayna.tobin@gmail.com
               </a>
             </p>

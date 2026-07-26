@@ -43,9 +43,9 @@ function ReviewForm({ campId, campName }) {
 
   if (status === 'success') {
     return (
-      <div className="bg-brand-sage bg-opacity-10 border border-brand-sage border-opacity-30 rounded-xl p-6 text-center">
+      <div className="bg-brand-forest bg-opacity-10 border border-brand-forest border-opacity-30 rounded-xl p-6 text-center">
         <div className="text-2xl mb-2">🎉</div>
-        <p className="font-semibold text-brand-navy">Thank you for your review!</p>
+        <p className="font-semibold text-brand-ink">Thank you for your review!</p>
         <p className="text-sm text-gray-600 mt-1">It will appear here after moderation, usually within a day or two.</p>
       </div>
     )
@@ -54,44 +54,44 @@ function ReviewForm({ campId, campName }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-brand-navy mb-1">Your Rating *</label>
+        <label className="block text-sm font-medium text-brand-ink mb-1">Your Rating *</label>
         <StarInput value={form.rating} onChange={(r) => setForm({ ...form, rating: r })} />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-brand-navy mb-1">Your Name *</label>
+          <label className="block text-sm font-medium text-brand-ink mb-1">Your Name *</label>
           <input
             type="text"
             required
             placeholder="e.g. Sarah M."
             value={form.reviewerName}
             onChange={(e) => setForm({ ...form, reviewerName: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-terracotta"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-coral"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-brand-navy mb-1">Child's Age <span className="text-gray-400 font-normal">(optional)</span></label>
+          <label className="block text-sm font-medium text-brand-ink mb-1">Child's Age <span className="text-gray-400 font-normal">(optional)</span></label>
           <input
             type="text"
             placeholder="e.g. 8"
             value={form.childAge}
             onChange={(e) => setForm({ ...form, childAge: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-terracotta"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-coral"
           />
         </div>
       </div>
       <div>
-        <label className="block text-sm font-medium text-brand-navy mb-1">Session Year <span className="text-gray-400 font-normal">(optional)</span></label>
+        <label className="block text-sm font-medium text-brand-ink mb-1">Session Year <span className="text-gray-400 font-normal">(optional)</span></label>
         <input
           type="text"
           placeholder="e.g. 2025"
           value={form.sessionYear}
           onChange={(e) => setForm({ ...form, sessionYear: e.target.value })}
-          className="w-full sm:w-32 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-terracotta"
+          className="w-full sm:w-32 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-coral"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-brand-navy mb-1">Your Review *</label>
+        <label className="block text-sm font-medium text-brand-ink mb-1">Your Review *</label>
         <textarea
           required
           minLength={10}
@@ -99,14 +99,14 @@ function ReviewForm({ campId, campName }) {
           placeholder="Tell other parents what you and your child loved (or didn't) about this camp..."
           value={form.review}
           onChange={(e) => setForm({ ...form, review: e.target.value })}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-terracotta resize-none"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-coral resize-none"
         />
       </div>
       {errorMsg && <p className="text-sm text-red-600">{errorMsg}</p>}
       <button
         type="submit"
         disabled={submitting}
-        className="px-6 py-2.5 bg-brand-terracotta text-white text-sm font-semibold rounded-xl hover:bg-opacity-90 transition-colors disabled:opacity-60"
+        className="px-6 py-2.5 bg-brand-coral text-white text-sm font-semibold rounded-xl hover:bg-opacity-90 transition-colors disabled:opacity-60"
       >
         {submitting ? 'Submitting…' : 'Submit Review'}
       </button>
@@ -172,22 +172,22 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
         <nav className="text-sm text-gray-500 mb-6 flex items-center gap-1.5 flex-wrap">
-          <Link href="/" className="hover:text-brand-terracotta">Home</Link>
+          <Link href="/" className="hover:text-brand-coral">Home</Link>
           <span>/</span>
-          <Link href="/camps" className="hover:text-brand-terracotta">Camps</Link>
+          <Link href="/camps" className="hover:text-brand-coral">Camps</Link>
           {camp.category && (
             <>
               <span>/</span>
               <Link
                 href={`/category/${camp.category.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
-                className="hover:text-brand-terracotta"
+                className="hover:text-brand-coral"
               >
                 {camp.category}
               </Link>
             </>
           )}
           <span>/</span>
-          <span className="text-brand-navy font-medium">{camp.name}</span>
+          <span className="text-brand-ink font-medium">{camp.name}</span>
         </nav>
 
         {/* Header */}
@@ -200,7 +200,7 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
               </span>
             )}
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-bold text-brand-navy mb-3">
+          <h1 className="font-display text-3xl sm:text-4xl font-bold text-brand-ink mb-3">
             {camp.name}
           </h1>
 
@@ -262,7 +262,7 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
               href={camp.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-3 bg-brand-terracotta text-white font-semibold rounded-xl hover:bg-opacity-90 transition-colors"
+              className="px-6 py-3 bg-brand-coral text-white font-semibold rounded-xl hover:bg-opacity-90 transition-colors"
             >
               Visit Camp Website →
             </a>
@@ -272,7 +272,7 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
               href={`https://www.google.com/maps/search/${encodeURIComponent(camp.address + ' ' + camp.city + ' TX')}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-3 border border-gray-300 text-brand-navy font-medium rounded-xl hover:bg-gray-50 transition-colors"
+              className="px-6 py-3 border border-gray-300 text-brand-ink font-medium rounded-xl hover:bg-gray-50 transition-colors"
             >
               View on Google Maps
             </a>
@@ -282,7 +282,7 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
         {/* Description */}
         {camp.description && (
           <div className="mb-8">
-            <h2 className="font-display text-xl font-bold text-brand-navy mb-3">About This Camp</h2>
+            <h2 className="font-display text-xl font-bold text-brand-ink mb-3">About This Camp</h2>
             <p className="text-gray-700 leading-relaxed">{camp.description}</p>
           </div>
         )}
@@ -290,11 +290,11 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
         {/* Special features */}
         {features.length > 0 && (
           <div className="mb-8 bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-            <h2 className="font-display text-xl font-bold text-brand-navy mb-4">Highlights</h2>
+            <h2 className="font-display text-xl font-bold text-brand-ink mb-4">Highlights</h2>
             <ul className="space-y-2">
               {features.map((feature, i) => (
                 <li key={i} className="flex items-start gap-2 text-gray-700">
-                  <span className="text-brand-sage font-bold mt-0.5">✓</span>
+                  <span className="text-brand-forest font-bold mt-0.5">✓</span>
                   <span>{feature.replace(/^[-•*]\s*/, '')}</span>
                 </li>
               ))}
@@ -305,14 +305,14 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
         {/* Address */}
         {camp.address && (
           <div className="mb-10 text-sm text-gray-600">
-            <strong className="text-brand-navy">Address:</strong> {camp.address}{camp.city ? `, ${camp.city}, TX` : ''}
+            <strong className="text-brand-ink">Address:</strong> {camp.address}{camp.city ? `, ${camp.city}, TX` : ''}
           </div>
         )}
 
         {/* Reviews section */}
         <div className="mb-10 border-t border-gray-200 pt-10">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="font-display text-2xl font-bold text-brand-navy">
+            <h2 className="font-display text-2xl font-bold text-brand-ink">
               Parent Reviews
               {reviews.length > 0 && (
                 <span className="ml-2 text-lg font-normal text-gray-500">({reviews.length})</span>
@@ -321,7 +321,7 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
             {!showForm && (
               <button
                 onClick={() => setShowForm(true)}
-                className="text-sm font-medium text-brand-terracotta border border-brand-terracotta rounded-lg px-4 py-1.5 hover:bg-brand-terracotta hover:text-white transition-colors"
+                className="text-sm font-medium text-brand-coral border border-brand-coral rounded-lg px-4 py-1.5 hover:bg-brand-coral hover:text-white transition-colors"
               >
                 Write a Review
               </button>
@@ -334,7 +334,7 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
                 <div key={r.id} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
                   <div className="flex items-start justify-between gap-4 mb-2">
                     <div>
-                      <p className="font-semibold text-brand-navy text-sm">{r.reviewerName}</p>
+                      <p className="font-semibold text-brand-ink text-sm">{r.reviewerName}</p>
                       <p className="text-xs text-gray-400">
                         {[r.childAge && `Child age ${r.childAge}`, r.sessionYear && `Summer ${r.sessionYear}`].filter(Boolean).join(' · ')}
                       </p>
@@ -351,7 +351,7 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
 
           {showForm && (
             <div className="bg-brand-cream rounded-xl p-6 border border-gray-200">
-              <h3 className="font-display text-lg font-bold text-brand-navy mb-4">Share Your Experience</h3>
+              <h3 className="font-display text-lg font-bold text-brand-ink mb-4">Share Your Experience</h3>
               <ReviewForm campId={camp.id} campName={camp.name} />
             </div>
           )}
@@ -360,7 +360,7 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
         {/* Related camps */}
         {relatedCamps.length > 0 && (
           <div className="border-t border-gray-200 pt-10">
-            <h2 className="font-display text-2xl font-bold text-brand-navy mb-6">
+            <h2 className="font-display text-2xl font-bold text-brand-ink mb-6">
               More {camp.category} Camps
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -371,7 +371,7 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
             <div className="mt-6 text-center">
               <Link
                 href={`/category/${camp.category.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
-                className="text-sm font-medium text-brand-terracotta hover:underline"
+                className="text-sm font-medium text-brand-coral hover:underline"
               >
                 See all {camp.category} camps →
               </Link>

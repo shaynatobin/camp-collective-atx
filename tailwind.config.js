@@ -7,14 +7,19 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'brand-terracotta': '#C96A3A',
-        'brand-cream': '#FAF4E8',
-        'brand-sage': '#6B8F6A',
-        'brand-navy': '#1E2B3A',
-        'brand-gold': '#E8B84B',
+        'brand-forest': '#3B6E52',
+        'brand-forest-dark': '#274A38',
+        'brand-coral': '#E8794A',
+        'brand-coral-dark': '#C25E33',
+        'brand-sun': '#F2C14E',
+        'brand-ink': '#26241F',
+        'brand-ink-soft': '#6B6558',
+        'brand-cream': '#F3ECDD',
+        'brand-paper': '#FAF6EF',
+        'brand-border': '#EAE1CC',
       },
       fontFamily: {
-        display: ['"Playfair Display"', 'Georgia', 'serif'],
+        display: ['"Fredoka"', 'system-ui', 'sans-serif'],
         sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
       },
     },

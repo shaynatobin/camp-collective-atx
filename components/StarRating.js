@@ -4,7 +4,7 @@ export function StarDisplay({ rating, max = 5 }) {
       {Array.from({ length: max }).map((_, i) => (
         <svg
           key={i}
-          className={`w-4 h-4 ${i < rating ? 'text-brand-gold' : 'text-gray-300'}`}
+          className={`w-4 h-4 ${i < rating ? 'text-brand-sun' : 'text-gray-300'}`}
           fill="currentColor"
           viewBox="0 0 20 20"
         >
@@ -27,7 +27,7 @@ export function StarInput({ value, onChange }) {
           aria-label={`${star} star${star !== 1 ? 's' : ''}`}
         >
           <svg
-            className={`w-8 h-8 transition-colors ${star <= value ? 'text-brand-gold' : 'text-gray-300 hover:text-brand-gold'}`}
+            className={`w-8 h-8 transition-colors ${star <= value ? 'text-brand-sun' : 'text-gray-300 hover:text-brand-sun'}`}
             fill="currentColor"
             viewBox="0 0 20 20"
           >

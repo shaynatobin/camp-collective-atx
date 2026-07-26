@@ -3,13 +3,13 @@
 @tailwind utilities;
 
 body {
-  background-color: #FAF4E8;
-  color: #1E2B3A;
+  background-color: #FAF6EF;
+  color: #26241F;
   font-family: 'DM Sans', system-ui, sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Fredoka', system-ui, sans-serif;
 }
 
 /* Smooth scrolling */
@@ -19,7 +19,7 @@ html {
 
 /* Focus styles for accessibility */
 *:focus-visible {
-  outline: 2px solid #C96A3A;
+  outline: 2px solid #E8794A;
   outline-offset: 2px;
 }
 
@@ -28,9 +28,9 @@ html {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #FAF4E8;
+  background: #FAF6EF;
 }
 ::-webkit-scrollbar-thumb {
-  background: #6B8F6A;
+  background: #3B6E52;
   border-radius: 3px;
 }
