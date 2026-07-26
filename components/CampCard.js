@@ -17,6 +17,10 @@ export default function CampCard({ camp }) {
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none'
+              e.currentTarget.parentElement.classList.add(`bg-gradient-to-br`, ...gradient.split(' '))
+            }}
           />
         ) : (
           <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center`}>

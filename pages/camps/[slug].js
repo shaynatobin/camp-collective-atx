@@ -1,21 +1,133 @@
+import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import Head from 'next/head'
 import Layout from '../../components/Layout'
 import CampCard from '../../components/CampCard'
 import CategoryBadge from '../../components/CategoryBadge'
-import { getAllCamps, getCampBySlug } from '../../lib/airtable'
+import { StarDisplay, StarInput } from '../../components/StarRating'
+import { getAllCamps, getReviewsForCamp } from '../../lib/airtable'
 import { getCategoryGradient, truncate } from '../../lib/utils'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://campcollectiveatx.com'
 
-export default function CampPage({ camp, relatedCamps }) {
+function ReviewForm({ campId, campName }) {
+  const [form, setForm] = useState({ reviewerName: '', childAge: '', sessionYear: '', rating: 0, review: '' })
+  const [submitting, setSubmitting] = useState(false)
+  const [status, setStatus] = useState(null) // 'success' | 'error'
+  const [errorMsg, setErrorMsg] = useState('')
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    if (form.rating === 0) { setErrorMsg('Please select a star rating.'); return }
+    setSubmitting(true)
+    setErrorMsg('')
+    try {
+      const res = await fetch('/api/submit-review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ campId, campName, ...form }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setStatus('success')
+      } else {
+        setErrorMsg(data.error || 'Something went wrong. Please try again.')
+      }
+    } catch {
+      setErrorMsg('Something went wrong. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  if (status === 'success') {
+    return (
+      <div className="bg-brand-sage bg-opacity-10 border border-brand-sage border-opacity-30 rounded-xl p-6 text-center">
+        <div className="text-2xl mb-2">🎉</div>
+        <p className="font-semibold text-brand-navy">Thank you for your review!</p>
+        <p className="text-sm text-gray-600 mt-1">It will appear here after moderation, usually within a day or two.</p>
+      </div>
+    )
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-brand-navy mb-1">Your Rating *</label>
+        <StarInput value={form.rating} onChange={(r) => setForm({ ...form, rating: r })} />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-brand-navy mb-1">Your Name *</label>
+          <input
+            type="text"
+            required
+            placeholder="e.g. Sarah M."
+            value={form.reviewerName}
+            onChange={(e) => setForm({ ...form, reviewerName: e.target.value })}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-terracotta"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-brand-navy mb-1">Child's Age <span className="text-gray-400 font-normal">(optional)</span></label>
+          <input
+            type="text"
+            placeholder="e.g. 8"
+            value={form.childAge}
+            onChange={(e) => setForm({ ...form, childAge: e.target.value })}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-terracotta"
+          />
+        </div>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-brand-navy mb-1">Session Year <span className="text-gray-400 font-normal">(optional)</span></label>
+        <input
+          type="text"
+          placeholder="e.g. 2025"
+          value={form.sessionYear}
+          onChange={(e) => setForm({ ...form, sessionYear: e.target.value })}
+          className="w-full sm:w-32 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-terracotta"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-brand-navy mb-1">Your Review *</label>
+        <textarea
+          required
+          minLength={10}
+          rows={4}
+          placeholder="Tell other parents what you and your child loved (or didn't) about this camp..."
+          value={form.review}
+          onChange={(e) => setForm({ ...form, review: e.target.value })}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-terracotta resize-none"
+        />
+      </div>
+      {errorMsg && <p className="text-sm text-red-600">{errorMsg}</p>}
+      <button
+        type="submit"
+        disabled={submitting}
+        className="px-6 py-2.5 bg-brand-terracotta text-white text-sm font-semibold rounded-xl hover:bg-opacity-90 transition-colors disabled:opacity-60"
+      >
+        {submitting ? 'Submitting…' : 'Submit Review'}
+      </button>
+      <p className="text-xs text-gray-400">Reviews are moderated before publishing.</p>
+    </form>
+  )
+}
+
+export default function CampPage({ camp, relatedCamps, reviews }) {
+  const [showForm, setShowForm] = useState(false)
+
   if (!camp) return null
 
   const gradient = getCategoryGradient(camp.category)
   const pageTitle = `${camp.name} | Austin Summer Camp | Camp Collective ATX`
   const pageDesc = truncate(camp.description || `${camp.name} is a summer camp in ${camp.city || 'Austin'}, TX.`, 160)
   const canonicalUrl = `${SITE_URL}/camps/${camp.slug}`
+
+  const avgRating = reviews.length
+    ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length) * 10) / 10
+    : null
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -33,6 +145,15 @@ export default function CampPage({ camp, relatedCamps }) {
           addressCountry: 'US',
         }
       : undefined,
+    ...(avgRating && reviews.length > 0 && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: avgRating,
+        reviewCount: reviews.length,
+        bestRating: 5,
+        worstRating: 1,
+      },
+    }),
   }
 
   const features = camp.specialFeatures
@@ -103,6 +224,12 @@ export default function CampPage({ camp, relatedCamps }) {
             {(camp.sessionStart || camp.sessionEnd) && (
               <span className="flex items-center gap-1">
                 📅 {camp.sessionStart}{camp.sessionEnd && camp.sessionEnd !== camp.sessionStart ? ` – ${camp.sessionEnd}` : ''}
+              </span>
+            )}
+            {avgRating && (
+              <span className="flex items-center gap-1.5">
+                <StarDisplay rating={Math.round(avgRating)} />
+                <span>{avgRating} ({reviews.length} review{reviews.length !== 1 ? 's' : ''})</span>
               </span>
             )}
           </div>
@@ -182,18 +309,52 @@ export default function CampPage({ camp, relatedCamps }) {
           </div>
         )}
 
-        {/* Google Reviews nudge */}
-        <div className="mb-10 p-4 bg-brand-gold bg-opacity-10 border border-brand-gold border-opacity-30 rounded-xl text-sm text-brand-navy">
-          <strong>Want to know what other parents think?</strong> Check out{' '}
-          <a
-            href={`https://www.google.com/search?q=${encodeURIComponent(camp.name + ' Austin TX reviews')}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline text-brand-terracotta"
-          >
-            Google Reviews for {camp.name}
-          </a>
-          .
+        {/* Reviews section */}
+        <div className="mb-10 border-t border-gray-200 pt-10">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="font-display text-2xl font-bold text-brand-navy">
+              Parent Reviews
+              {reviews.length > 0 && (
+                <span className="ml-2 text-lg font-normal text-gray-500">({reviews.length})</span>
+              )}
+            </h2>
+            {!showForm && (
+              <button
+                onClick={() => setShowForm(true)}
+                className="text-sm font-medium text-brand-terracotta border border-brand-terracotta rounded-lg px-4 py-1.5 hover:bg-brand-terracotta hover:text-white transition-colors"
+              >
+                Write a Review
+              </button>
+            )}
+          </div>
+
+          {reviews.length > 0 ? (
+            <div className="space-y-6 mb-8">
+              {reviews.map((r) => (
+                <div key={r.id} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+                  <div className="flex items-start justify-between gap-4 mb-2">
+                    <div>
+                      <p className="font-semibold text-brand-navy text-sm">{r.reviewerName}</p>
+                      <p className="text-xs text-gray-400">
+                        {[r.childAge && `Child age ${r.childAge}`, r.sessionYear && `Summer ${r.sessionYear}`].filter(Boolean).join(' · ')}
+                      </p>
+                    </div>
+                    <StarDisplay rating={r.rating} />
+                  </div>
+                  <p className="text-gray-700 text-sm leading-relaxed">{r.review}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm mb-6">No reviews yet — be the first to share your experience!</p>
+          )}
+
+          {showForm && (
+            <div className="bg-brand-cream rounded-xl p-6 border border-gray-200">
+              <h3 className="font-display text-lg font-bold text-brand-navy mb-4">Share Your Experience</h3>
+              <ReviewForm campId={camp.id} campName={camp.name} />
+            </div>
+          )}
         </div>
 
         {/* Related camps */}
@@ -236,12 +397,13 @@ export async function getStaticProps({ params }) {
 
   if (!camp) return { notFound: true }
 
-  const relatedCamps = camps
-    .filter((c) => c.id !== camp.id && c.category === camp.category)
-    .slice(0, 3)
+  const [relatedCamps, reviews] = await Promise.all([
+    Promise.resolve(camps.filter((c) => c.id !== camp.id && c.category === camp.category).slice(0, 3)),
+    getReviewsForCamp(camp.id),
+  ])
 
   return {
-    props: { camp, relatedCamps },
+    props: { camp, relatedCamps, reviews },
     revalidate: 3600,
   }
 }
