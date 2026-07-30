@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useRouter } from 'next/router'
 import Layout from '../../components/Layout'
 import CampCard from '../../components/CampCard'
 import { getAllCamps } from '../../lib/airtable'
@@ -42,6 +43,13 @@ function isFullDay(hoursText) {
 }
 
 export default function CampsPage({ camps }) {
+  const router = useRouter()
+  const sharedSlugs = useMemo(() => {
+    const param = router.query.shortlist
+    if (!param) return null
+    return new Set(param.split(',').map((s) => s.trim()).filter(Boolean))
+  }, [router.query.shortlist])
+
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
   const [city, setCity] = useState('')
@@ -68,6 +76,7 @@ export default function CampsPage({ camps }) {
     const a2 = age2 ? parseInt(age2) : null
 
     return camps.filter((camp) => {
+      if (sharedSlugs && !sharedSlugs.has(camp.slug)) return false
       if (search && !camp.name.toLowerCase().includes(search.toLowerCase())) return false
       if (category && camp.category !== category) return false
       if (city && camp.city !== city) return false
@@ -95,7 +104,7 @@ export default function CampsPage({ camps }) {
       }
       return 0
     })
-  }, [camps, search, category, city, campType, fullDayOnly, age1, age2, sort])
+  }, [camps, sharedSlugs, search, category, city, campType, fullDayOnly, age1, age2, sort])
 
   function clearFilters() {
     setSearch('')
@@ -119,12 +128,22 @@ export default function CampsPage({ camps }) {
         {/* Page header */}
         <div className="mb-8">
           <h1 className="font-display text-3xl sm:text-4xl font-bold text-brand-ink mb-2">
-            Austin Summer Camps
+            {sharedSlugs ? 'Shared Camp List' : 'Austin Summer Camps'}
           </h1>
           <p className="text-gray-600">
-            {camps.length}+ camps across Greater Austin — sports, arts, STEM, nature, and more.
+            {sharedSlugs
+              ? `Someone shared ${sharedSlugs.size} camp${sharedSlugs.size !== 1 ? 's' : ''} with you.`
+              : `${camps.length}+ camps across Greater Austin — sports, arts, STEM, nature, and more.`}
           </p>
         </div>
+
+        {/* Shared list banner */}
+        {sharedSlugs && (
+          <div className="bg-brand-coral bg-opacity-10 border border-brand-coral border-opacity-30 rounded-xl px-4 py-3 mb-6 flex items-center justify-between gap-3 flex-wrap">
+            <p className="text-sm text-brand-ink">You're viewing a shared shortlist.</p>
+            <a href="/camps" className="text-sm font-medium text-brand-coral hover:underline">Browse all camps →</a>
+          </div>
+        )}
 
         {/* Filters */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6 space-y-3">
