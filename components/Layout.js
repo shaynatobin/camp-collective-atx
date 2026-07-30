@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import Header from './Header'
 import Footer from './Footer'
+import ShortlistDrawer from './ShortlistDrawer'
 
 const DEFAULT_TITLE = 'Camp Collective ATX | Austin Summer Camp Directory'
 const DEFAULT_DESCRIPTION =
@@ -43,6 +44,7 @@ export default function Layout({ children, title, description, ogImage, canonica
         <Header />
         <main className="flex-grow">{children}</main>
         <Footer />
+        <ShortlistDrawer />
       </div>
     </>
   )

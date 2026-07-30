@@ -2,12 +2,45 @@ import { useState, useMemo } from 'react'
 import Layout from '../../components/Layout'
 import CampCard from '../../components/CampCard'
 import { getAllCamps } from '../../lib/airtable'
+import { CATEGORY_LABELS } from '../../lib/utils'
+
+// Parse "Ages 6–18", "Ages 5+", "All Ages", "K–12" → { min, max }
+function parseAgeRange(text) {
+  if (!text) return null
+  const t = text.toLowerCase()
+  if (t.includes('all ages')) return { min: 3, max: 18 }
+  const range = t.match(/(\d+)\s*[–\-]\s*(\d+)/)
+  if (range) return { min: parseInt(range[1]), max: parseInt(range[2]) }
+  const plus = t.match(/(\d+)\s*\+/)
+  if (plus) return { min: parseInt(plus[1]), max: 18 }
+  if (t.includes('k') && (t.includes('12') || t.includes('8'))) return { min: 5, max: 18 }
+  return null
+}
+
+// Detect if camp hours cover a full workday (pickup 4pm or later)
+function isFullDay(hoursText) {
+  if (!hoursText) return false
+  const t = hoursText.toLowerCase()
+  if (t.includes('full') && t.includes('day')) return true
+  const times = [...t.matchAll(/(\d+)(?::(\d+))?\s*(am|pm)/g)]
+  let latest = 0
+  for (const m of times) {
+    let h = parseInt(m[1])
+    if (m[3] === 'pm' && h !== 12) h += 12
+    if (m[3] === 'am' && h === 12) h = 0
+    latest = Math.max(latest, h)
+  }
+  return latest >= 16
+}
 
 export default function CampsPage({ camps }) {
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
   const [city, setCity] = useState('')
   const [campType, setCampType] = useState('')
+  const [fullDayOnly, setFullDayOnly] = useState(false)
+  const [age1, setAge1] = useState('')
+  const [age2, setAge2] = useState('')
 
   const categories = useMemo(() => {
     return [...new Set(camps.map((c) => c.category).filter(Boolean))].sort()
@@ -22,23 +55,36 @@ export default function CampsPage({ camps }) {
   }, [camps])
 
   const filtered = useMemo(() => {
+    const a1 = age1 ? parseInt(age1) : null
+    const a2 = age2 ? parseInt(age2) : null
+
     return camps.filter((camp) => {
       if (search && !camp.name.toLowerCase().includes(search.toLowerCase())) return false
       if (category && camp.category !== category) return false
       if (city && camp.city !== city) return false
       if (campType && camp.campType !== campType) return false
+      if (fullDayOnly && !isFullDay(camp.hours)) return false
+      if (a1 !== null || a2 !== null) {
+        const range = parseAgeRange(camp.ageRange)
+        if (!range) return false
+        if (a1 !== null && (a1 < range.min || a1 > range.max)) return false
+        if (a2 !== null && (a2 < range.min || a2 > range.max)) return false
+      }
       return true
     })
-  }, [camps, search, category, city, campType])
+  }, [camps, search, category, city, campType, fullDayOnly, age1, age2])
 
   function clearFilters() {
     setSearch('')
     setCategory('')
     setCity('')
     setCampType('')
+    setFullDayOnly(false)
+    setAge1('')
+    setAge2('')
   }
 
-  const hasFilters = search || category || city || campType
+  const hasFilters = search || category || city || campType || fullDayOnly || age1 || age2
 
   return (
     <Layout
@@ -57,7 +103,8 @@ export default function CampsPage({ camps }) {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6 space-y-3">
+          {/* Row 1: search + dropdowns */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <input
               type="text"
@@ -73,7 +120,7 @@ export default function CampsPage({ camps }) {
             >
               <option value="">All Categories</option>
               {categories.map((cat) => (
-                <option key={cat} value={cat}>{cat}</option>
+                <option key={cat} value={cat}>{CATEGORY_LABELS[cat] || cat}</option>
               ))}
             </select>
             <select
@@ -97,6 +144,40 @@ export default function CampsPage({ camps }) {
               ))}
             </select>
           </div>
+
+          {/* Row 2: sibling ages + full-day */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-brand-ink-soft whitespace-nowrap">Child ages:</span>
+              <input
+                type="number"
+                min="3" max="18"
+                value={age1}
+                onChange={(e) => setAge1(e.target.value)}
+                placeholder="e.g. 7"
+                className="w-20 px-3 py-2 rounded-lg border border-gray-300 text-sm text-brand-ink focus:outline-none focus:ring-2 focus:ring-brand-coral"
+              />
+              <span className="text-sm text-brand-ink-soft">&</span>
+              <input
+                type="number"
+                min="3" max="18"
+                value={age2}
+                onChange={(e) => setAge2(e.target.value)}
+                placeholder="e.g. 11"
+                className="w-20 px-3 py-2 rounded-lg border border-gray-300 text-sm text-brand-ink focus:outline-none focus:ring-2 focus:ring-brand-coral"
+              />
+            </div>
+
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={fullDayOnly}
+                onChange={(e) => setFullDayOnly(e.target.checked)}
+                className="w-4 h-4 accent-brand-coral rounded"
+              />
+              <span className="text-sm text-brand-ink">Full day (pickup 4pm+)</span>
+            </label>
+          </div>
         </div>
 
         {/* Results count + clear */}
@@ -105,10 +186,7 @@ export default function CampsPage({ camps }) {
             Showing <span className="font-semibold text-brand-ink">{filtered.length}</span> of {camps.length} camps
           </p>
           {hasFilters && (
-            <button
-              onClick={clearFilters}
-              className="text-sm text-brand-coral hover:underline"
-            >
+            <button onClick={clearFilters} className="text-sm text-brand-coral hover:underline">
               Clear filters
             </button>
           )}

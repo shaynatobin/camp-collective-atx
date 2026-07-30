@@ -3,12 +3,15 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 import Image from 'next/image'
 import CategoryBadge from './CategoryBadge'
+import { useShortlist } from '../lib/ShortlistContext'
 import { getInitials, getCategoryGradient } from '../lib/utils'
 
 export default function CampCard({ camp }) {
   const gradient = getCategoryGradient(camp.category)
   const [imgFailed, setImgFailed] = useState(false)
   const router = useRouter()
+  const { toggle, isInShortlist } = useShortlist()
+  const saved = isInShortlist(camp.id)
 
   return (
     <div
@@ -33,6 +36,17 @@ export default function CampCard({ camp }) {
             </span>
           </div>
         )}
+
+        {/* Heart button */}
+        <button
+          onClick={(e) => { e.stopPropagation(); toggle(camp) }}
+          className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center shadow transition-colors duration-150 ${
+            saved ? 'bg-brand-coral text-white' : 'bg-white text-gray-400 hover:text-brand-coral'
+          }`}
+          title={saved ? 'Remove from shortlist' : 'Save to shortlist'}
+        >
+          {saved ? '♥' : '♡'}
+        </button>
       </div>
 
       {/* Card body */}
