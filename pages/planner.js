@@ -40,6 +40,10 @@ const CHILD_COLORS = [
 
 function parsePrice(text) {
   if (!text) return null
+  // Prefer explicit /week pattern
+  const weekMatch = text.match(/\$([\d,]+)(?:\s*[-–]\s*\$[\d,]+)?\s*\/\s*week/i)
+  if (weekMatch) return parseInt(weekMatch[1].replace(/,/g, ''))
+  // Fallback: first number (legacy slots without weeklyRate)
   const m = text.match(/\$?([\d,]+)/)
   if (!m) return null
   return parseInt(m[1].replace(/,/g, ''))
@@ -169,6 +173,7 @@ export default function PlannerPage({ camps }) {
         name: camp.name,
         slug: camp.slug,
         priceRange: camp.priceRange,
+        weeklyRate: camp.weeklyRate || null,
         category: camp.category,
         photo: camp.photo,
       },
@@ -186,8 +191,14 @@ export default function PlannerPage({ camps }) {
     })
   }
 
-  const totalCost = useMemo(() => {
-    return Object.values(slots).reduce((sum, c) => sum + (parsePrice(c.priceRange) || 0), 0)
+  const costSummary = useMemo(() => {
+    const slotList = Object.values(slots)
+    let total = 0, priced = 0
+    slotList.forEach(c => {
+      const rate = c.weeklyRate || parsePrice(c.priceRange)
+      if (rate) { total += rate; priced++ }
+    })
+    return { total, priced, unpriced: slotList.length - priced }
   }, [slots])
 
   const totalWeeks = useMemo(() => {
@@ -283,12 +294,15 @@ export default function PlannerPage({ camps }) {
                 <p className="font-bold text-brand-ink text-xl leading-tight">{Object.keys(slots).length}</p>
               </div>
             </div>
-            {totalCost > 0 && (
+            {costSummary.total > 0 && (
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-brand-sun/30 flex items-center justify-center text-brand-ink text-lg">💰</div>
                 <div>
-                  <p className="text-xs text-brand-ink-soft font-medium">Est. total cost</p>
-                  <p className="font-bold text-brand-coral text-xl leading-tight">${totalCost.toLocaleString()}</p>
+                  <p className="text-xs text-brand-ink-soft font-medium">Est. weekly cost</p>
+                  <p className="font-bold text-brand-coral text-xl leading-tight">${costSummary.total.toLocaleString()}</p>
+                  {costSummary.unpriced > 0 && (
+                    <p className="text-[11px] text-brand-ink-soft">{costSummary.unpriced} camp{costSummary.unpriced > 1 ? 's' : ''} not priced</p>
+                  )}
                 </div>
               </div>
             )}

@@ -84,6 +84,21 @@ function hasAftercareHours(hoursText) {
   return latest >= 17
 }
 
+function hasFinancialAid(camp) {
+  const text = ((camp.description || '') + ' ' + (camp.specialFeatures || '') + ' ' + (camp.priceRange || '')).toLowerCase()
+  return /scholarship|campership|financial aid|need.based|sliding scale|subsid|reduced.fee|assistance available/.test(text)
+}
+
+function hasMealsIncluded(camp) {
+  const text = ((camp.description || '') + ' ' + (camp.specialFeatures || '') + ' ' + (camp.hours || '')).toLowerCase()
+  return /meals?\s+(included|provided|served)|lunch\s+(included|provided)|breakfast\s+(included|provided)|snacks?\s+provided|food\s+provided/.test(text)
+}
+
+function hasTransportation(camp) {
+  const text = ((camp.description || '') + ' ' + (camp.specialFeatures || '')).toLowerCase()
+  return /\bbus\b(?:\s+service|\s+pickup|\s+transport)?|shuttle|transportation\s+(provided|available)|bus\s+pickup/.test(text)
+}
+
 export default function CampsPage({ camps }) {
   const router = useRouter()
   const sharedSlugs = useMemo(() => {
@@ -130,10 +145,10 @@ export default function CampsPage({ camps }) {
       if (city && camp.city !== city) return false
       if (campType && camp.campType !== campType) return false
       if (fullDayOnly && !isFullDay(camp.hours)) return false
-      if (aftercareOnly && !camp.aftercareAvailable && !hasAftercareHours(camp.hours)) return false
-      if (financialAidOnly && !camp.financialAid) return false
-      if (mealsOnly && !camp.mealsIncluded) return false
-      if (transportOnly && !camp.transportationProvided) return false
+      if (aftercareOnly && !hasAftercareHours(camp.hours)) return false
+      if (financialAidOnly && !hasFinancialAid(camp)) return false
+      if (mealsOnly && !hasMealsIncluded(camp)) return false
+      if (transportOnly && !hasTransportation(camp)) return false
       if (a1 !== null || a2 !== null) {
         const range = parseAgeRange(camp.ageRange)
         if (!range) return false
