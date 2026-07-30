@@ -6,17 +6,18 @@ import { getAllCamps } from '../../lib/airtable'
 import { slugify, CATEGORY_LABELS } from '../../lib/utils'
 
 const SPORT_KEYWORDS = {
-  'Soccer': ['soccer'],
-  'Basketball': ['basketball'],
-  'Football': ['football'],
-  'Baseball': ['baseball', 'softball'],
-  'Tennis': ['tennis'],
-  'Swimming': ['swim', 'aquatic'],
-  'Gymnastics': ['gymnastics'],
+  'Soccer': ['soccer', 'futbol', 'fútbol'],
+  'Basketball': ['basketball', 'hoops'],
+  'Football': ['football', 'flag football', 'tackle'],
+  'Baseball / Softball': ['baseball', 'softball', 'pitching', 'batting'],
+  'Tennis': ['tennis', 'pickleball'],
+  'Swimming': ['swim', 'aquatic', 'water polo', 'diving'],
+  'Gymnastics / Cheer': ['gymnastics', 'tumbling', 'cheer', 'cheerleading'],
   'Volleyball': ['volleyball'],
   'Golf': ['golf'],
   'Lacrosse': ['lacrosse'],
-  'Rock Climbing': ['rock climbing', 'climbing'],
+  'Martial Arts': ['martial arts', 'karate', 'taekwondo', 'jiu-jitsu', 'judo', 'kung fu', 'krav maga', 'bjj', 'boxing', 'wrestling', 'mma'],
+  'Rock Climbing': ['rock climbing', 'climbing', 'bouldering'],
   'Archery': ['archery'],
   'Fencing': ['fencing'],
   'Ninja / Obstacle': ['ninja', 'obstacle'],
@@ -123,10 +124,10 @@ export default function CategoryPage({ camps, categoryName }) {
 }
 
 export async function getStaticPaths() {
-  return {
-    paths: [],
-    fallback: 'blocking',
-  }
+  const camps = await getAllCamps()
+  const categories = [...new Set(camps.map((c) => c.category).filter(Boolean))]
+  const paths = categories.map((cat) => ({ params: { category: slugify(cat) } }))
+  return { paths, fallback: 'blocking' }
 }
 
 export async function getStaticProps({ params }) {
