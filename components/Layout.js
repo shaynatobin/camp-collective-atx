@@ -35,6 +35,7 @@ export default function Layout({ children, title, description, ogImage, canonica
         <meta name="twitter:description" content={pageDesc} />
         <meta name="twitter:image" content={pageImage} />
 
+        <meta name="google-site-verification" content="n2UeOJNS1eWt7GpW0eV_yLFYXd-p6TvB_ZFOQ0Ikcxk" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
