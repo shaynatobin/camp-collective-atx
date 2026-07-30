@@ -13,8 +13,30 @@ const WEEKS = Array.from({ length: 12 }, (_, i) => {
   return {
     idx: i,
     label: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    month: d.toLocaleDateString('en-US', { month: 'long' }),
   }
 })
+
+// Group weeks by month for the header
+const MONTH_GROUPS = (() => {
+  const groups = []
+  let cur = null
+  WEEKS.forEach((w, i) => {
+    if (!cur || cur.month !== w.month) {
+      cur = { month: w.month, start: i, count: 1 }
+      groups.push(cur)
+    } else {
+      cur.count++
+    }
+  })
+  return groups
+})()
+
+const CHILD_COLORS = [
+  { bg: 'bg-brand-forest', text: 'text-white', ring: 'ring-brand-forest', light: 'bg-brand-forest/10' },
+  { bg: 'bg-brand-coral', text: 'text-white', ring: 'ring-brand-coral', light: 'bg-brand-coral/10' },
+  { bg: 'bg-brand-sun', text: 'text-brand-ink', ring: 'ring-brand-sun', light: 'bg-brand-sun/20' },
+]
 
 function parsePrice(text) {
   if (!text) return null
@@ -43,20 +65,20 @@ function CampThumb({ camp }) {
   )
 }
 
-function CampSlot({ camp, onRemove }) {
+function CampSlot({ camp, onRemove, color }) {
   const gradient = getCategoryGradient(camp.category)
   return (
-    <div className="relative rounded-xl overflow-hidden h-24 group border border-gray-100 shadow-sm">
-      <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-20`} />
-      <div className="relative p-2 h-full flex flex-col justify-between">
-        <p className="text-xs font-semibold text-brand-ink line-clamp-3 leading-tight">{camp.name}</p>
+    <div className="relative rounded-xl overflow-hidden h-24 group border border-gray-100 shadow-sm bg-white">
+      <div className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${gradient}`} />
+      <div className="relative pl-3 pr-2 py-2 h-full flex flex-col justify-between">
+        <p className="text-xs font-semibold text-brand-ink line-clamp-3 leading-tight pr-4">{camp.name}</p>
         {camp.priceRange && (
-          <p className="text-xs text-gray-500 mt-1">{camp.priceRange}</p>
+          <p className="text-[11px] text-brand-ink-soft font-medium">{camp.priceRange}</p>
         )}
       </div>
       <button
         onClick={onRemove}
-        className="absolute top-1 right-1 w-5 h-5 rounded-full bg-white shadow text-gray-400 hover:text-red-400 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+        className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-white shadow text-gray-400 hover:text-red-400 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
         title="Remove"
       >
         ×
@@ -65,18 +87,28 @@ function CampSlot({ camp, onRemove }) {
   )
 }
 
+function AddSlotButton({ onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full h-24 border-2 border-dashed border-gray-200 rounded-xl text-gray-300 hover:border-brand-coral hover:text-brand-coral hover:bg-brand-coral/5 transition-all text-2xl flex items-center justify-center group"
+    >
+      <span className="group-hover:scale-110 transition-transform inline-block leading-none">+</span>
+    </button>
+  )
+}
+
 export default function PlannerPage({ camps }) {
   const router = useRouter()
   const [children, setChildren] = useState([{ id: 'c1', name: 'Child 1' }])
   const [slots, setSlots] = useState({})
   const [loaded, setLoaded] = useState(false)
-  const [picker, setPicker] = useState(null) // { childId, weekIdx }
+  const [picker, setPicker] = useState(null)
   const [pickerSearch, setPickerSearch] = useState('')
   const [pickerCategory, setPickerCategory] = useState('')
   const [editingChild, setEditingChild] = useState(null)
   const [copied, setCopied] = useState(false)
 
-  // Load from URL param first, then localStorage
   useEffect(() => {
     const p = router.query.p
     if (p) {
@@ -84,7 +116,6 @@ export default function PlannerPage({ camps }) {
         const plan = JSON.parse(decodeURIComponent(atob(p)))
         if (plan.children) setChildren(plan.children)
         if (plan.slots) {
-          // Validate slots against current camp IDs
           const validIds = new Set(camps.map(c => c.id))
           const valid = {}
           Object.entries(plan.slots).forEach(([k, v]) => {
@@ -107,7 +138,6 @@ export default function PlannerPage({ camps }) {
     setLoaded(true)
   }, [router.query.p, camps])
 
-  // Save to localStorage
   useEffect(() => {
     if (!loaded) return
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ children, slots }))
@@ -187,54 +217,66 @@ export default function PlannerPage({ camps }) {
   }
 
   const pickerChild = picker ? children.find(c => c.id === picker.childId) : null
+  const hasCamps = Object.keys(slots).length > 0
 
   return (
     <Layout
       title="Summer Planner | Camp Collective ATX"
       description="Plan your family's entire summer camp schedule week by week. Add camps for each child and track your total cost."
     >
-      <div className="max-w-full px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page header */}
-        <div className="max-w-7xl mx-auto flex items-start justify-between mb-6 flex-wrap gap-3">
+      {/* Page header */}
+      <div className="bg-gradient-to-br from-brand-forest to-brand-forest-dark text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex items-end justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="font-display text-3xl sm:text-4xl font-bold text-brand-ink">
-              My Summer Planner
-            </h1>
-            <p className="text-gray-600 mt-1">Map out your family's camps week by week.</p>
+            <p className="text-brand-sun text-xs font-semibold uppercase tracking-widest mb-1">Summer 2026</p>
+            <h1 className="font-display text-3xl sm:text-4xl font-bold leading-tight">My Summer Planner</h1>
+            <p className="text-white/70 mt-1 text-sm">Map out camps week by week for up to 3 kids.</p>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
             {children.length < 3 && (
               <button
                 onClick={addChild}
-                className="px-4 py-2 border border-brand-coral text-brand-coral rounded-xl text-sm font-medium hover:bg-brand-coral hover:text-white transition-colors"
+                className="px-4 py-2 border border-white/40 text-white rounded-xl text-sm font-medium hover:bg-white/10 transition-colors"
               >
                 + Add Child
               </button>
             )}
             <button
               onClick={handleShare}
-              className="px-4 py-2 bg-brand-coral text-white rounded-xl text-sm font-medium hover:bg-opacity-90 transition-colors"
+              className="px-4 py-2 bg-brand-sun text-brand-ink rounded-xl text-sm font-semibold hover:bg-yellow-300 transition-colors"
             >
-              {copied ? 'Copied!' : 'Share Plan'}
+              {copied ? '✓ Copied!' : 'Share Plan'}
             </button>
           </div>
         </div>
+      </div>
+
+      <div className="max-w-full px-4 sm:px-6 lg:px-8 py-6">
 
         {/* Summary bar */}
-        {Object.keys(slots).length > 0 && (
-          <div className="max-w-7xl mx-auto bg-white rounded-xl border border-gray-100 shadow-sm px-5 py-3 mb-6 flex flex-wrap gap-8 items-center">
-            <div>
-              <p className="text-xs text-gray-500">Weeks planned</p>
-              <p className="font-bold text-brand-ink text-xl">{totalWeeks}</p>
+        {hasCamps && (
+          <div className="max-w-7xl mx-auto bg-white rounded-2xl border border-brand-border shadow-sm px-6 py-4 mb-6 flex flex-wrap gap-8 items-center">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-brand-forest/10 flex items-center justify-center text-brand-forest text-lg">📅</div>
+              <div>
+                <p className="text-xs text-brand-ink-soft font-medium">Weeks planned</p>
+                <p className="font-bold text-brand-ink text-xl leading-tight">{totalWeeks}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-gray-500">Camps added</p>
-              <p className="font-bold text-brand-ink text-xl">{Object.keys(slots).length}</p>
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-brand-coral/10 flex items-center justify-center text-brand-coral text-lg">🏕️</div>
+              <div>
+                <p className="text-xs text-brand-ink-soft font-medium">Camps added</p>
+                <p className="font-bold text-brand-ink text-xl leading-tight">{Object.keys(slots).length}</p>
+              </div>
             </div>
             {totalCost > 0 && (
-              <div>
-                <p className="text-xs text-gray-500">Est. total cost</p>
-                <p className="font-bold text-brand-coral text-xl">${totalCost.toLocaleString()}</p>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-brand-sun/30 flex items-center justify-center text-brand-ink text-lg">💰</div>
+                <div>
+                  <p className="text-xs text-brand-ink-soft font-medium">Est. total cost</p>
+                  <p className="font-bold text-brand-coral text-xl leading-tight">${totalCost.toLocaleString()}</p>
+                </div>
               </div>
             )}
           </div>
@@ -242,13 +284,28 @@ export default function PlannerPage({ camps }) {
 
         {/* Calendar grid */}
         <div className="overflow-x-auto pb-6">
-          <div style={{ minWidth: `${WEEKS.length * 152 + 112}px` }} className="max-w-7xl mx-auto">
+          <div style={{ minWidth: `${WEEKS.length * 152 + 160}px` }} className="max-w-7xl mx-auto">
+
+            {/* Month group labels */}
+            <div className="flex mb-1 ml-40">
+              {MONTH_GROUPS.map(g => (
+                <div
+                  key={g.month}
+                  style={{ width: g.count * 144 }}
+                  className="flex-shrink-0 px-1"
+                >
+                  <div className="text-xs font-bold text-brand-forest tracking-wide uppercase px-2">
+                    {g.month}
+                  </div>
+                </div>
+              ))}
+            </div>
 
             {/* Week header row */}
-            <div className="flex mb-2 ml-28">
+            <div className="flex mb-3 ml-40">
               {WEEKS.map(w => (
                 <div key={w.idx} className="w-36 flex-shrink-0 px-1">
-                  <div className="text-xs font-semibold text-gray-500 text-center py-1.5 bg-gray-50 rounded-lg">
+                  <div className="text-xs font-semibold text-brand-ink-soft text-center py-1.5 bg-brand-cream rounded-lg">
                     {w.label}
                   </div>
                 </div>
@@ -256,74 +313,86 @@ export default function PlannerPage({ camps }) {
             </div>
 
             {/* Child rows */}
-            {children.map((child, childIndex) => (
-              <div key={child.id} className="flex mb-3 items-start">
-                {/* Child name label */}
-                <div className="w-28 flex-shrink-0 pr-3 pt-2">
-                  {editingChild === child.id ? (
-                    <input
-                      autoFocus
-                      value={child.name}
-                      onChange={e => renameChild(child.id, e.target.value)}
-                      onBlur={() => setEditingChild(null)}
-                      onKeyDown={e => e.key === 'Enter' && setEditingChild(null)}
-                      className="w-full text-sm font-bold text-brand-ink border-b-2 border-brand-coral outline-none bg-transparent pb-0.5"
-                    />
-                  ) : (
-                    <div className="group flex items-center gap-1">
-                      <button
-                        onClick={() => setEditingChild(child.id)}
-                        className="text-sm font-bold text-brand-ink hover:text-brand-coral truncate max-w-[76px] text-left"
-                        title="Click to rename"
-                      >
-                        {child.name}
-                      </button>
-                      {children.length > 1 && (
-                        <button
-                          onClick={() => removeChild(child.id)}
-                          className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-opacity leading-none"
-                          title="Remove child"
-                        >
-                          ×
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
+            {children.map((child, childIndex) => {
+              const color = CHILD_COLORS[childIndex % CHILD_COLORS.length]
+              return (
+                <div key={child.id} className="flex mb-3 items-start">
+                  {/* Child label */}
+                  <div className="w-40 flex-shrink-0 pr-4 pt-1.5">
+                    <div className="flex items-center gap-2">
+                      {/* Colored avatar */}
+                      <div className={`w-7 h-7 rounded-full flex-shrink-0 ${color.bg} ${color.text} flex items-center justify-center text-xs font-bold shadow-sm`}>
+                        {child.name.charAt(0).toUpperCase()}
+                      </div>
 
-                {/* Week slots */}
-                {WEEKS.map(w => {
-                  const key = slotKey(child.id, w.idx)
-                  const camp = slots[key]
-                  return (
-                    <div key={w.idx} className="w-36 flex-shrink-0 px-1">
-                      {camp ? (
-                        <CampSlot camp={camp} onRemove={() => removeSlot(child.id, w.idx)} />
+                      {editingChild === child.id ? (
+                        <input
+                          autoFocus
+                          value={child.name}
+                          onChange={e => renameChild(child.id, e.target.value)}
+                          onBlur={() => setEditingChild(null)}
+                          onKeyDown={e => e.key === 'Enter' && setEditingChild(null)}
+                          className="flex-1 min-w-0 text-sm font-bold text-brand-ink border-b-2 border-brand-coral outline-none bg-transparent pb-0.5"
+                        />
                       ) : (
-                        <button
-                          onClick={() => {
-                            setPicker({ childId: child.id, weekIdx: w.idx })
-                            setPickerSearch('')
-                            setPickerCategory('')
-                          }}
-                          className="w-full h-24 border-2 border-dashed border-gray-200 rounded-xl text-gray-300 hover:border-brand-coral hover:text-brand-coral transition-colors text-2xl flex items-center justify-center"
-                        >
-                          +
-                        </button>
+                        <div className="flex items-center gap-1 min-w-0">
+                          <button
+                            onClick={() => setEditingChild(child.id)}
+                            className="text-sm font-bold text-brand-ink hover:text-brand-coral truncate text-left"
+                            title="Click to rename"
+                          >
+                            {child.name}
+                          </button>
+                          {children.length > 1 && (
+                            <button
+                              onClick={() => removeChild(child.id)}
+                              className="text-gray-300 hover:text-red-400 transition-colors leading-none flex-shrink-0 text-base"
+                              title="Remove child"
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
                       )}
                     </div>
-                  )
-                })}
-              </div>
-            ))}
+                  </div>
+
+                  {/* Week slots */}
+                  {WEEKS.map(w => {
+                    const key = slotKey(child.id, w.idx)
+                    const camp = slots[key]
+                    return (
+                      <div key={w.idx} className="w-36 flex-shrink-0 px-1">
+                        {camp ? (
+                          <CampSlot
+                            camp={camp}
+                            color={color}
+                            onRemove={() => removeSlot(child.id, w.idx)}
+                          />
+                        ) : (
+                          <AddSlotButton
+                            onClick={() => {
+                              setPicker({ childId: child.id, weekIdx: w.idx })
+                              setPickerSearch('')
+                              setPickerCategory('')
+                            }}
+                          />
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            })}
           </div>
         </div>
 
         {/* Empty state */}
-        {Object.keys(slots).length === 0 && loaded && (
-          <div className="max-w-7xl mx-auto text-center py-8 text-gray-400">
-            <p className="text-sm">Click any <span className="font-bold text-brand-coral">+</span> to add a camp to that week.</p>
-            <Link href="/camps" className="mt-3 inline-block text-sm text-brand-coral hover:underline">
+        {!hasCamps && loaded && (
+          <div className="max-w-7xl mx-auto text-center py-10">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-brand-cream text-3xl mb-4">🏕️</div>
+            <p className="text-brand-ink-soft text-sm font-medium">Click any <span className="font-bold text-brand-coral">+</span> to add a camp to that week.</p>
+            <Link href="/camps" className="mt-3 inline-block text-sm text-brand-coral hover:underline font-medium">
               Browse camps →
             </Link>
           </div>
@@ -333,39 +402,47 @@ export default function PlannerPage({ camps }) {
       {/* Camp picker drawer */}
       {picker && (
         <>
-          <div className="fixed inset-0 bg-black bg-opacity-30 z-40" onClick={() => setPicker(null)} />
+          <div className="fixed inset-0 bg-black/40 z-40 backdrop-blur-sm" onClick={() => setPicker(null)} />
           <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col">
             {/* Picker header */}
-            <div className="flex items-center justify-between p-5 border-b border-gray-100">
-              <div>
-                <h2 className="font-display text-lg font-bold text-brand-ink">Add a Camp</h2>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {pickerChild?.name} · {WEEKS[picker.weekIdx]?.label} week
-                </p>
+            <div className="bg-gradient-to-br from-brand-forest to-brand-forest-dark text-white p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h2 className="font-display text-lg font-bold">Add a Camp</h2>
+                  <p className="text-white/70 text-xs mt-0.5">
+                    {pickerChild?.name} · {WEEKS[picker.weekIdx]?.label} week
+                  </p>
+                </div>
+                <button
+                  onClick={() => setPicker(null)}
+                  className="text-white/60 hover:text-white text-2xl leading-none mt-0.5 transition-colors"
+                >
+                  ×
+                </button>
               </div>
-              <button onClick={() => setPicker(null)} className="text-gray-400 hover:text-brand-ink text-2xl leading-none">×</button>
-            </div>
 
-            {/* Search + category */}
-            <div className="p-4 border-b border-gray-100 space-y-2">
-              <input
-                type="text"
-                autoFocus
-                value={pickerSearch}
-                onChange={e => setPickerSearch(e.target.value)}
-                placeholder="Search camps..."
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand-coral"
-              />
-              <select
-                value={pickerCategory}
-                onChange={e => setPickerCategory(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-coral"
-              >
-                <option value="">All Categories</option>
-                {categories.map(c => (
-                  <option key={c} value={c}>{CATEGORY_LABELS[c] || c}</option>
-                ))}
-              </select>
+              {/* Search inside header */}
+              <div className="mt-4 space-y-2">
+                <input
+                  type="text"
+                  autoFocus
+                  value={pickerSearch}
+                  onChange={e => setPickerSearch(e.target.value)}
+                  placeholder="Search camps..."
+                  className="w-full px-3 py-2 rounded-xl bg-white/15 border border-white/20 text-white placeholder-white/50 text-sm focus:outline-none focus:bg-white/20 focus:border-white/40 transition-colors"
+                />
+                <select
+                  value={pickerCategory}
+                  onChange={e => setPickerCategory(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-white/15 border border-white/20 text-white text-sm focus:outline-none focus:bg-white/20 focus:border-white/40 transition-colors appearance-none"
+                  style={{ colorScheme: 'dark' }}
+                >
+                  <option value="" className="text-brand-ink bg-white">All Categories</option>
+                  {categories.map(c => (
+                    <option key={c} value={c} className="text-brand-ink bg-white">{CATEGORY_LABELS[c] || c}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {/* Camp list */}
@@ -379,7 +456,7 @@ export default function PlannerPage({ camps }) {
                   <CampThumb camp={camp} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-brand-ink line-clamp-1">{camp.name}</p>
-                    <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">
+                    <p className="text-xs text-brand-ink-soft mt-0.5 line-clamp-1">
                       {[
                         camp.city && `${camp.city}, TX`,
                         camp.priceRange,
@@ -389,10 +466,16 @@ export default function PlannerPage({ camps }) {
                       ].filter(Boolean).join(' · ')}
                     </p>
                   </div>
+                  <svg className="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </button>
               ))}
               {filteredCamps.length === 0 && (
-                <p className="text-center text-gray-400 text-sm py-12">No camps found.</p>
+                <div className="text-center py-16">
+                  <p className="text-2xl mb-2">🔍</p>
+                  <p className="text-brand-ink-soft text-sm">No camps found.</p>
+                </div>
               )}
             </div>
           </div>
