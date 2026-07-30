@@ -241,6 +241,19 @@ export default function PlannerPage({ camps }) {
                 + Add Child
               </button>
             )}
+            {hasCamps && (
+              <button
+                onClick={() => {
+                  if (confirm('Clear your entire plan and start over?')) {
+                    setSlots({})
+                    setChildren([{ id: 'c1', name: 'Child 1' }])
+                  }
+                }}
+                className="px-4 py-2 border border-white/30 text-white/70 rounded-xl text-sm font-medium hover:bg-white/10 hover:text-white transition-colors"
+              >
+                Start Over
+              </button>
+            )}
             <button
               onClick={handleShare}
               className="px-4 py-2 bg-brand-sun text-brand-ink rounded-xl text-sm font-semibold hover:bg-yellow-300 transition-colors"

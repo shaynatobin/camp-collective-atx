@@ -8,6 +8,7 @@ import CategoryBadge from '../../components/CategoryBadge'
 import { StarDisplay, StarInput } from '../../components/StarRating'
 import { getAllCamps, getReviewsForCamp } from '../../lib/airtable'
 import { getCategoryGradient, truncate } from '../../lib/utils'
+import { usePlanner } from '../../lib/PlannerContext'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://campcollectiveatx.com'
 
@@ -117,6 +118,7 @@ function ReviewForm({ campId, campName }) {
 
 export default function CampPage({ camp, relatedCamps, reviews }) {
   const [showForm, setShowForm] = useState(false)
+  const { openAddModal } = usePlanner()
 
   if (!camp) return null
 
@@ -275,6 +277,12 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
               Visit Camp Website →
             </a>
           )}
+          <button
+            onClick={() => openAddModal(camp)}
+            className="px-6 py-3 bg-brand-forest text-white font-semibold rounded-xl hover:bg-brand-forest-dark transition-colors"
+          >
+            📅 Add to Planner
+          </button>
           {camp.address && (
             <a
               href={`https://www.google.com/maps/search/${encodeURIComponent(camp.address + ' ' + camp.city + ' TX')}`}

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import CategoryBadge from './CategoryBadge'
 import { useShortlist } from '../lib/ShortlistContext'
+import { usePlanner } from '../lib/PlannerContext'
 import { getInitials, getCategoryGradient } from '../lib/utils'
 
 export default function CampCard({ camp }) {
@@ -11,6 +12,7 @@ export default function CampCard({ camp }) {
   const [imgFailed, setImgFailed] = useState(false)
   const router = useRouter()
   const { toggle, isInShortlist } = useShortlist()
+  const { openAddModal } = usePlanner()
   const saved = isInShortlist(camp.id)
 
   return (
@@ -37,16 +39,25 @@ export default function CampCard({ camp }) {
           </div>
         )}
 
-        {/* Heart button */}
-        <button
-          onClick={(e) => { e.stopPropagation(); toggle(camp) }}
-          className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center shadow transition-colors duration-150 ${
-            saved ? 'bg-brand-coral text-white' : 'bg-white text-gray-400 hover:text-brand-coral'
-          }`}
-          title={saved ? 'Remove from shortlist' : 'Save to shortlist'}
-        >
-          {saved ? '♥' : '♡'}
-        </button>
+        {/* Action buttons */}
+        <div className="absolute top-2 right-2 flex flex-col gap-1.5">
+          <button
+            onClick={(e) => { e.stopPropagation(); toggle(camp) }}
+            className={`w-8 h-8 rounded-full flex items-center justify-center shadow transition-colors duration-150 ${
+              saved ? 'bg-brand-coral text-white' : 'bg-white text-gray-400 hover:text-brand-coral'
+            }`}
+            title={saved ? 'Remove from shortlist' : 'Save to shortlist'}
+          >
+            {saved ? '♥' : '♡'}
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); openAddModal(camp) }}
+            className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow text-gray-400 hover:text-brand-forest transition-colors duration-150 text-sm"
+            title="Add to Summer Planner"
+          >
+            📅
+          </button>
+        </div>
       </div>
 
       {/* Card body */}
