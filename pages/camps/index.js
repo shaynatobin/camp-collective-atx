@@ -68,6 +68,22 @@ function isFullDay(hoursText) {
   return latest >= 16
 }
 
+// Detect aftercare: explicit keywords OR closes at 5pm or later
+function hasAftercareHours(hoursText) {
+  if (!hoursText) return false
+  const t = hoursText.toLowerCase()
+  if (/aftercare|extended care|extended day|wrap.?around/.test(t)) return true
+  const times = [...t.matchAll(/(\d+)(?::(\d+))?\s*(am|pm)/g)]
+  let latest = 0
+  for (const m of times) {
+    let h = parseInt(m[1])
+    if (m[3] === 'pm' && h !== 12) h += 12
+    if (m[3] === 'am' && h === 12) h = 0
+    latest = Math.max(latest, h)
+  }
+  return latest >= 17
+}
+
 export default function CampsPage({ camps }) {
   const router = useRouter()
   const sharedSlugs = useMemo(() => {
@@ -81,6 +97,10 @@ export default function CampsPage({ camps }) {
   const [city, setCity] = useState('')
   const [campType, setCampType] = useState('')
   const [fullDayOnly, setFullDayOnly] = useState(false)
+  const [aftercareOnly, setAftercareOnly] = useState(false)
+  const [financialAidOnly, setFinancialAidOnly] = useState(false)
+  const [mealsOnly, setMealsOnly] = useState(false)
+  const [transportOnly, setTransportOnly] = useState(false)
   const [age1, setAge1] = useState('')
   const [age2, setAge2] = useState('')
   const [sort, setSort] = useState('az')
@@ -110,6 +130,10 @@ export default function CampsPage({ camps }) {
       if (city && camp.city !== city) return false
       if (campType && camp.campType !== campType) return false
       if (fullDayOnly && !isFullDay(camp.hours)) return false
+      if (aftercareOnly && !camp.aftercareAvailable && !hasAftercareHours(camp.hours)) return false
+      if (financialAidOnly && !camp.financialAid) return false
+      if (mealsOnly && !camp.mealsIncluded) return false
+      if (transportOnly && !camp.transportationProvided) return false
       if (a1 !== null || a2 !== null) {
         const range = parseAgeRange(camp.ageRange)
         if (!range) return false
@@ -132,7 +156,7 @@ export default function CampsPage({ camps }) {
       }
       return 0
     })
-  }, [camps, sharedSlugs, search, category, sportFilter, city, campType, fullDayOnly, age1, age2, sort])
+  }, [camps, sharedSlugs, search, category, sportFilter, city, campType, fullDayOnly, aftercareOnly, financialAidOnly, mealsOnly, transportOnly, age1, age2, sort])
 
   const isSports = category === 'Sports & Athletics'
 
@@ -159,12 +183,16 @@ export default function CampsPage({ camps }) {
     setCity('')
     setCampType('')
     setFullDayOnly(false)
+    setAftercareOnly(false)
+    setFinancialAidOnly(false)
+    setMealsOnly(false)
+    setTransportOnly(false)
     setAge1('')
     setAge2('')
     setSort('az')
   }
 
-  const hasFilters = search || category || city || campType || fullDayOnly || age1 || age2 || sort !== 'az'
+  const hasFilters = search || category || city || campType || fullDayOnly || aftercareOnly || financialAidOnly || mealsOnly || transportOnly || age1 || age2 || sort !== 'az'
 
   return (
     <Layout
@@ -235,7 +263,7 @@ export default function CampsPage({ camps }) {
             </select>
           </div>
 
-          {/* Row 2: sibling ages + full-day */}
+          {/* Row 2: sibling ages */}
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
               <span className="text-sm text-brand-ink-soft whitespace-nowrap">Child ages:</span>
@@ -257,16 +285,29 @@ export default function CampsPage({ camps }) {
                 className="w-20 px-3 py-2 rounded-lg border border-gray-300 text-sm text-brand-ink focus:outline-none focus:ring-2 focus:ring-brand-coral"
               />
             </div>
+          </div>
 
-            <label className="flex items-center gap-2 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={fullDayOnly}
-                onChange={(e) => setFullDayOnly(e.target.checked)}
-                className="w-4 h-4 accent-brand-coral rounded"
-              />
-              <span className="text-sm text-brand-ink">Full day (pickup 4pm+)</span>
-            </label>
+          {/* Row 3: feature filter chips */}
+          <div className="flex flex-wrap gap-2">
+            {[
+              { label: 'Full day (4pm+)', state: fullDayOnly, set: setFullDayOnly },
+              { label: 'Aftercare (5pm+)', state: aftercareOnly, set: setAftercareOnly },
+              { label: 'Financial aid', state: financialAidOnly, set: setFinancialAidOnly },
+              { label: 'Meals included', state: mealsOnly, set: setMealsOnly },
+              { label: 'Transportation', state: transportOnly, set: setTransportOnly },
+            ].map(({ label, state, set }) => (
+              <button
+                key={label}
+                onClick={() => set(!state)}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors duration-150 ${
+                  state
+                    ? 'bg-brand-forest text-white border-brand-forest'
+                    : 'bg-white text-brand-ink-soft border-gray-300 hover:border-brand-forest hover:text-brand-forest'
+                }`}
+              >
+                {state ? '✓ ' : ''}{label}
+              </button>
+            ))}
           </div>
         </div>
 
