@@ -10,19 +10,32 @@ export default function CampCard({ camp }) {
     <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col">
       {/* Photo or gradient placeholder */}
       <div className="relative w-full h-44 flex-shrink-0">
-        {camp.photo ? (
-          <Image
-            src={camp.photo}
-            alt={camp.name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            onError={(e) => {
-              e.currentTarget.style.display = 'none'
-              e.currentTarget.parentElement.classList.add(`bg-gradient-to-br`, ...gradient.split(' '))
-            }}
-          />
-        ) : (
+        {camp.photo ? (() => {
+          const url = camp.photo.toLowerCase()
+          const isLogo = url.endsWith('.svg') || url.endsWith('.gif') ||
+            url.includes('logo') || url.includes('icon') || url.includes('badge')
+          return (
+            <div className={`w-full h-full ${isLogo ? 'bg-white flex items-center justify-center p-4' : 'relative'}`}>
+              <Image
+                src={camp.photo}
+                alt={camp.name}
+                fill={!isLogo}
+                width={isLogo ? 200 : undefined}
+                height={isLogo ? 120 : undefined}
+                className={isLogo ? 'object-contain max-h-28 w-auto' : 'object-cover'}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none'
+                  const parent = e.currentTarget.closest('.relative, div')
+                  if (parent) {
+                    parent.className = `w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center`
+                    parent.innerHTML = `<span style="color:white;font-size:1.875rem;font-weight:700;opacity:0.8">${getInitials(camp.name)}</span>`
+                  }
+                }}
+              />
+            </div>
+          )
+        })() : (
           <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center`}>
             <span className="text-white text-3xl font-display font-bold opacity-80">
               {getInitials(camp.name)}
