@@ -26,6 +26,32 @@ function parsePrice(text) {
   return parseInt(m[1].replace(/,/g, ''))
 }
 
+const SPORT_KEYWORDS = {
+  'Soccer': ['soccer', 'futbol'],
+  'Basketball': ['basketball', 'hoops'],
+  'Football': ['football', 'flag football'],
+  'Baseball / Softball': ['baseball', 'softball'],
+  'Tennis': ['tennis', 'pickleball'],
+  'Swimming': ['swim', 'aquatic', 'water polo'],
+  'Gymnastics / Cheer': ['gymnastics', 'tumbling', 'cheer', 'cheerleading'],
+  'Volleyball': ['volleyball'],
+  'Golf': ['golf'],
+  'Lacrosse': ['lacrosse'],
+  'Martial Arts': ['martial arts', 'karate', 'taekwondo', 'jiu-jitsu', 'judo', 'boxing', 'wrestling'],
+  'Rock Climbing': ['rock climbing', 'climbing', 'bouldering'],
+  'Archery': ['archery'],
+  'Fencing': ['fencing'],
+  'Ninja / Obstacle': ['ninja', 'obstacle'],
+}
+
+function detectSport(camp) {
+  const text = (camp.name + ' ' + (camp.description || '')).toLowerCase()
+  for (const [sport, keywords] of Object.entries(SPORT_KEYWORDS)) {
+    if (keywords.some((kw) => text.includes(kw))) return sport
+  }
+  return 'Multi-Sport'
+}
+
 // Detect if camp hours cover a full workday (pickup 4pm or later)
 function isFullDay(hoursText) {
   if (!hoursText) return false
@@ -58,6 +84,7 @@ export default function CampsPage({ camps }) {
   const [age1, setAge1] = useState('')
   const [age2, setAge2] = useState('')
   const [sort, setSort] = useState('az')
+  const [sportFilter, setSportFilter] = useState('All')
 
   const categories = useMemo(() => {
     return [...new Set(camps.map((c) => c.category).filter(Boolean))].sort()
@@ -79,6 +106,7 @@ export default function CampsPage({ camps }) {
       if (sharedSlugs && !sharedSlugs.has(camp.slug)) return false
       if (search && !camp.name.toLowerCase().includes(search.toLowerCase())) return false
       if (category && camp.category !== category) return false
+      if (category === 'Sports & Athletics' && sportFilter !== 'All' && detectSport(camp) !== sportFilter) return false
       if (city && camp.city !== city) return false
       if (campType && camp.campType !== campType) return false
       if (fullDayOnly && !isFullDay(camp.hours)) return false
@@ -104,11 +132,30 @@ export default function CampsPage({ camps }) {
       }
       return 0
     })
-  }, [camps, sharedSlugs, search, category, city, campType, fullDayOnly, age1, age2, sort])
+  }, [camps, sharedSlugs, search, category, sportFilter, city, campType, fullDayOnly, age1, age2, sort])
+
+  const isSports = category === 'Sports & Athletics'
+
+  const sportCounts = useMemo(() => {
+    if (!isSports) return {}
+    const sportCamps = camps.filter((c) => c.category === 'Sports & Athletics')
+    const counts = {}
+    sportCamps.forEach((c) => {
+      const s = detectSport(c)
+      counts[s] = (counts[s] || 0) + 1
+    })
+    return counts
+  }, [camps, isSports])
+
+  const sportTabs = useMemo(() => {
+    if (!isSports) return []
+    return ['All', ...Object.keys(sportCounts).sort()]
+  }, [sportCounts, isSports])
 
   function clearFilters() {
     setSearch('')
     setCategory('')
+    setSportFilter('All')
     setCity('')
     setCampType('')
     setFullDayOnly(false)
@@ -158,7 +205,7 @@ export default function CampsPage({ camps }) {
             />
             <select
               value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              onChange={(e) => { setCategory(e.target.value); setSportFilter('All') }}
               className="px-3 py-2.5 rounded-lg border border-gray-300 text-sm text-brand-ink bg-white focus:outline-none focus:ring-2 focus:ring-brand-coral"
             >
               <option value="">All Categories</option>
@@ -222,6 +269,30 @@ export default function CampsPage({ camps }) {
             </label>
           </div>
         </div>
+
+        {/* Sport sub-filters */}
+        {isSports && sportTabs.length > 1 && (
+          <div className="flex flex-wrap gap-2 mb-6">
+            {sportTabs.map((sport) => (
+              <button
+                key={sport}
+                onClick={() => setSportFilter(sport)}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-150 ${
+                  sportFilter === sport
+                    ? 'bg-brand-coral text-white'
+                    : 'bg-white border border-gray-300 text-brand-ink-soft hover:border-brand-coral hover:text-brand-coral'
+                }`}
+              >
+                {sport}
+                {sport !== 'All' && (
+                  <span className={`ml-1.5 text-xs ${sportFilter === sport ? 'opacity-80' : 'opacity-50'}`}>
+                    {sportCounts[sport]}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Results count + sort + clear */}
         <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">

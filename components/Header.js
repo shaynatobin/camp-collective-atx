@@ -50,7 +50,6 @@ export default function Header() {
 
   const navLinks = [
     { href: '/camps', label: 'Browse Camps' },
-    { href: '/category/arts-creativity', label: 'Categories' },
     { href: '/about', label: 'About' },
   ]
 
