@@ -17,6 +17,14 @@ function parseAgeRange(text) {
   return null
 }
 
+// Extract a numeric price for sorting from text like "$400/week", "$240–$315/week"
+function parsePrice(text) {
+  if (!text) return null
+  const m = text.match(/\$?([\d,]+)/)
+  if (!m) return null
+  return parseInt(m[1].replace(/,/g, ''))
+}
+
 // Detect if camp hours cover a full workday (pickup 4pm or later)
 function isFullDay(hoursText) {
   if (!hoursText) return false
@@ -41,6 +49,7 @@ export default function CampsPage({ camps }) {
   const [fullDayOnly, setFullDayOnly] = useState(false)
   const [age1, setAge1] = useState('')
   const [age2, setAge2] = useState('')
+  const [sort, setSort] = useState('az')
 
   const categories = useMemo(() => {
     return [...new Set(camps.map((c) => c.category).filter(Boolean))].sort()
@@ -71,8 +80,22 @@ export default function CampsPage({ camps }) {
         if (a2 !== null && (a2 < range.min || a2 > range.max)) return false
       }
       return true
+    }).sort((a, b) => {
+      if (sort === 'az') return a.name.localeCompare(b.name)
+      if (sort === 'za') return b.name.localeCompare(a.name)
+      if (sort === 'price-asc') {
+        const pa = parsePrice(a.priceRange) ?? Infinity
+        const pb = parsePrice(b.priceRange) ?? Infinity
+        return pa - pb
+      }
+      if (sort === 'price-desc') {
+        const pa = parsePrice(a.priceRange) ?? -1
+        const pb = parsePrice(b.priceRange) ?? -1
+        return pb - pa
+      }
+      return 0
     })
-  }, [camps, search, category, city, campType, fullDayOnly, age1, age2])
+  }, [camps, search, category, city, campType, fullDayOnly, age1, age2, sort])
 
   function clearFilters() {
     setSearch('')
@@ -82,9 +105,10 @@ export default function CampsPage({ camps }) {
     setFullDayOnly(false)
     setAge1('')
     setAge2('')
+    setSort('az')
   }
 
-  const hasFilters = search || category || city || campType || fullDayOnly || age1 || age2
+  const hasFilters = search || category || city || campType || fullDayOnly || age1 || age2 || sort !== 'az'
 
   return (
     <Layout
@@ -180,16 +204,28 @@ export default function CampsPage({ camps }) {
           </div>
         </div>
 
-        {/* Results count + clear */}
-        <div className="flex items-center justify-between mb-6">
+        {/* Results count + sort + clear */}
+        <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
           <p className="text-sm text-gray-600">
             Showing <span className="font-semibold text-brand-ink">{filtered.length}</span> of {camps.length} camps
           </p>
-          {hasFilters && (
-            <button onClick={clearFilters} className="text-sm text-brand-coral hover:underline">
-              Clear filters
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              className="px-3 py-1.5 rounded-lg border border-gray-300 text-sm text-brand-ink bg-white focus:outline-none focus:ring-2 focus:ring-brand-coral"
+            >
+              <option value="az">A–Z</option>
+              <option value="za">Z–A</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+            </select>
+            {hasFilters && (
+              <button onClick={clearFilters} className="text-sm text-brand-coral hover:underline">
+                Clear filters
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Camp grid */}

@@ -236,24 +236,32 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
         </div>
 
         {/* Photo or gradient placeholder */}
-        <div className="relative w-full h-64 sm:h-80 rounded-2xl overflow-hidden mb-8">
-          {camp.photo ? (
-            <Image
-              src={camp.photo}
-              alt={camp.name}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 800px"
-              priority
-            />
-          ) : (
-            <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center`}>
-              <span className="text-white text-5xl font-display font-bold opacity-60">
-                {camp.name.charAt(0)}
-              </span>
+        {(() => {
+          if (!camp.photo) {
+            return (
+              <div className={`relative w-full h-64 sm:h-80 rounded-2xl overflow-hidden mb-8 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+                <span className="text-white text-5xl font-display font-bold opacity-60">
+                  {camp.name.charAt(0)}
+                </span>
+              </div>
+            )
+          }
+          const url = camp.photo.toLowerCase()
+          const isLogo = url.endsWith('.svg') || url.endsWith('.gif') ||
+            url.includes('logo') || url.includes('icon') || url.includes('badge')
+          return (
+            <div className={`relative w-full h-64 sm:h-80 rounded-2xl overflow-hidden mb-8 ${isLogo ? 'bg-brand-cream' : ''}`}>
+              <Image
+                src={camp.photo}
+                alt={camp.name}
+                fill
+                className={isLogo ? 'object-contain p-8' : 'object-cover'}
+                sizes="(max-width: 768px) 100vw, 800px"
+                priority
+              />
             </div>
-          )}
-        </div>
+          )
+        })()}
 
         {/* CTA buttons */}
         <div className="flex flex-wrap gap-3 mb-10">
