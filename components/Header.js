@@ -50,6 +50,7 @@ export default function Header() {
 
   const navLinks = [
     { href: '/camps', label: 'Browse Camps' },
+    { href: '/planner', label: 'Summer Planner' },
     { href: '/about', label: 'About' },
   ]
 
