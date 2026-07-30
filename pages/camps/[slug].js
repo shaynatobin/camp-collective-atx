@@ -248,16 +248,13 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
               </div>
             )
           }
-          const url = camp.photo.toLowerCase()
-          const isLogo = url.endsWith('.svg') || url.endsWith('.gif') ||
-            url.includes('logo') || url.includes('icon') || url.includes('badge')
           return (
-            <div className={`relative w-full h-64 sm:h-80 rounded-2xl overflow-hidden mb-8 ${isLogo ? 'bg-brand-cream' : ''}`}>
+            <div className={`relative w-full h-64 sm:h-80 rounded-2xl overflow-hidden mb-8 ${camp.isLogo ? 'bg-brand-cream' : ''}`}>
               <Image
                 src={camp.photo}
                 alt={camp.name}
                 fill
-                className={isLogo ? 'object-contain p-8' : 'object-cover'}
+                className={camp.isLogo ? 'object-contain p-8' : 'object-cover'}
                 sizes="(max-width: 768px) 100vw, 800px"
                 priority
               />
