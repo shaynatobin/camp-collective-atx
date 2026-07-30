@@ -1,11 +1,60 @@
+import { useState, useMemo } from 'react'
 import Layout from '../../components/Layout'
 import CampCard from '../../components/CampCard'
 import Link from 'next/link'
 import { getAllCamps } from '../../lib/airtable'
 import { slugify, CATEGORY_LABELS } from '../../lib/utils'
 
+const SPORT_KEYWORDS = {
+  'Soccer': ['soccer'],
+  'Basketball': ['basketball'],
+  'Football': ['football'],
+  'Baseball': ['baseball', 'softball'],
+  'Tennis': ['tennis'],
+  'Swimming': ['swim', 'aquatic'],
+  'Gymnastics': ['gymnastics'],
+  'Volleyball': ['volleyball'],
+  'Golf': ['golf'],
+  'Lacrosse': ['lacrosse'],
+  'Rock Climbing': ['rock climbing', 'climbing'],
+  'Archery': ['archery'],
+  'Fencing': ['fencing'],
+  'Ninja / Obstacle': ['ninja', 'obstacle'],
+}
+
+function detectSport(camp) {
+  const text = (camp.name + ' ' + (camp.description || '')).toLowerCase()
+  for (const [sport, keywords] of Object.entries(SPORT_KEYWORDS)) {
+    if (keywords.some((kw) => text.includes(kw))) return sport
+  }
+  return 'Multi-Sport'
+}
+
 export default function CategoryPage({ camps, categoryName }) {
   const displayName = CATEGORY_LABELS[categoryName] || categoryName
+  const isSports = categoryName === 'Sports & Athletics'
+  const [sportFilter, setSportFilter] = useState('All')
+
+  const sportsWithCounts = useMemo(() => {
+    if (!isSports) return {}
+    const counts = {}
+    camps.forEach((c) => {
+      const s = detectSport(c)
+      counts[s] = (counts[s] || 0) + 1
+    })
+    return counts
+  }, [camps, isSports])
+
+  const sportTabs = useMemo(() => {
+    if (!isSports) return []
+    return ['All', ...Object.keys(sportsWithCounts).sort()]
+  }, [sportsWithCounts, isSports])
+
+  const visibleCamps = useMemo(() => {
+    if (!isSports || sportFilter === 'All') return camps
+    return camps.filter((c) => detectSport(c) === sportFilter)
+  }, [camps, isSports, sportFilter])
+
   return (
     <Layout
       title={`${displayName} Camps in Austin TX | Camp Collective ATX`}
@@ -23,22 +72,49 @@ export default function CategoryPage({ camps, categoryName }) {
         <h1 className="font-display text-3xl sm:text-4xl font-bold text-brand-ink mb-2">
           {displayName} Camps in Austin
         </h1>
-        <p className="text-gray-600 mb-10">
-          {camps.length} camp{camps.length !== 1 ? 's' : ''} found in Greater Austin.
+        <p className="text-gray-600 mb-6">
+          {visibleCamps.length} camp{visibleCamps.length !== 1 ? 's' : ''} found in Greater Austin.
         </p>
 
-        {camps.length > 0 ? (
+        {/* Sport sub-filters */}
+        {isSports && sportTabs.length > 1 && (
+          <div className="flex flex-wrap gap-2 mb-8">
+            {sportTabs.map((sport) => (
+              <button
+                key={sport}
+                onClick={() => setSportFilter(sport)}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-150 ${
+                  sportFilter === sport
+                    ? 'bg-brand-coral text-white'
+                    : 'bg-white border border-brand-border text-brand-ink-soft hover:border-brand-coral hover:text-brand-coral'
+                }`}
+              >
+                {sport}
+                {sport !== 'All' && (
+                  <span className={`ml-1.5 text-xs ${sportFilter === sport ? 'opacity-80' : 'opacity-50'}`}>
+                    {sportsWithCounts[sport]}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {visibleCamps.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {camps.map((camp) => (
+            {visibleCamps.map((camp) => (
               <CampCard key={camp.id} camp={camp} />
             ))}
           </div>
         ) : (
           <div className="text-center py-20">
-            <p className="text-gray-500">No camps found in this category yet.</p>
-            <Link href="/camps" className="mt-4 inline-block text-brand-coral hover:underline">
-              Browse all camps →
-            </Link>
+            <p className="text-gray-500">No {sportFilter !== 'All' ? sportFilter : ''} camps found yet.</p>
+            <button
+              onClick={() => setSportFilter('All')}
+              className="mt-4 inline-block text-brand-coral hover:underline"
+            >
+              Show all sports →
+            </button>
           </div>
         )}
       </div>
