@@ -11,7 +11,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://campcollectiveatx.
 export default function Layout({ children, title, description, ogImage, canonical }) {
   const pageTitle = title || DEFAULT_TITLE
   const pageDesc = description || DEFAULT_DESCRIPTION
-  const pageImage = ogImage || `${SITE_URL}/og-default.png`
+  const pageImage = ogImage || `${SITE_URL}/api/og?title=${encodeURIComponent(pageTitle)}`
   const canonicalUrl = canonical || SITE_URL
 
   return (
