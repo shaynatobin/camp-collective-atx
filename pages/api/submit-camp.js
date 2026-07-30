@@ -29,6 +29,7 @@ export default async function handler(req, res) {
   }
 
   if (url) fields['URL'] = url
+  fields['Status'] = 'Pending'
 
   // Remove undefined values
   Object.keys(fields).forEach((key) => {
