@@ -74,14 +74,14 @@ export default function SubmitACamp() {
   return (
     <Layout
       title="Submit a Camp | Camp Collective ATX"
-      description="Is your Austin summer camp missing from our directory? Submit it here and we'll add it within 2 business days. Listings are always free."
+      description="Is your Austin summer camp missing from our directory? Submit it here and we'll add it within 2 business days."
     >
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
         <h1 className="font-display text-3xl sm:text-4xl font-bold text-brand-ink mb-2">
           Submit a Camp
         </h1>
         <p className="text-gray-600 mb-10">
-          Is your camp missing from our directory? We'll add it within 2 business days. Listings are always free.
+          Is your camp missing from our directory? We'll add it within 2 business days.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
