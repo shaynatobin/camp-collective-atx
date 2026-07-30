@@ -46,10 +46,8 @@ export default function CategoryPage({ camps, categoryName }) {
 }
 
 export async function getStaticPaths() {
-  const camps = await getAllCamps()
-  const categories = [...new Set(camps.map((c) => c.category).filter(Boolean))]
   return {
-    paths: categories.map((cat) => ({ params: { category: slugify(cat) } })),
+    paths: [],
     fallback: 'blocking',
   }
 }

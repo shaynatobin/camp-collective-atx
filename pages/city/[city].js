@@ -46,10 +46,8 @@ export default function CityPage({ camps, cityName }) {
 }
 
 export async function getStaticPaths() {
-  const camps = await getAllCamps()
-  const cities = [...new Set(camps.map((c) => c.city).filter(Boolean))]
   return {
-    paths: cities.map((city) => ({ params: { city: slugify(city) } })),
+    paths: [],
     fallback: 'blocking',
   }
 }

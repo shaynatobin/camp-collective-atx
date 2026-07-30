@@ -384,9 +384,8 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
 }
 
 export async function getStaticPaths() {
-  const camps = await getAllCamps()
   return {
-    paths: camps.map((c) => ({ params: { slug: c.slug } })),
+    paths: [],
     fallback: 'blocking',
   }
 }
