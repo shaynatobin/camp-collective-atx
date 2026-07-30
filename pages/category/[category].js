@@ -2,13 +2,14 @@ import Layout from '../../components/Layout'
 import CampCard from '../../components/CampCard'
 import Link from 'next/link'
 import { getAllCamps } from '../../lib/airtable'
-import { slugify } from '../../lib/utils'
+import { slugify, CATEGORY_LABELS } from '../../lib/utils'
 
 export default function CategoryPage({ camps, categoryName }) {
+  const displayName = CATEGORY_LABELS[categoryName] || categoryName
   return (
     <Layout
-      title={`${categoryName} Camps in Austin TX | Camp Collective ATX`}
-      description={`Find the best ${categoryName} summer camps in Austin, TX. Browse ${camps.length} camps for kids across Greater Austin.`}
+      title={`${displayName} Camps in Austin TX | Camp Collective ATX`}
+      description={`Find the best ${displayName} summer camps in Austin, TX. Browse ${camps.length} camps for kids across Greater Austin.`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <nav className="text-sm text-gray-500 mb-6">
@@ -16,14 +17,14 @@ export default function CategoryPage({ camps, categoryName }) {
           <span className="mx-1.5">/</span>
           <Link href="/camps" className="hover:text-brand-coral">Camps</Link>
           <span className="mx-1.5">/</span>
-          <span className="text-brand-ink font-medium">{categoryName}</span>
+          <span className="text-brand-ink font-medium">{displayName}</span>
         </nav>
 
         <h1 className="font-display text-3xl sm:text-4xl font-bold text-brand-ink mb-2">
-          {categoryName} Camps in Austin
+          {displayName} Camps in Austin
         </h1>
         <p className="text-gray-600 mb-10">
-          {camps.length} camp{camps.length !== 1 ? 's' : ''} found in the Greater Austin area.
+          {camps.length} camp{camps.length !== 1 ? 's' : ''} found in Greater Austin.
         </p>
 
         {camps.length > 0 ? (
