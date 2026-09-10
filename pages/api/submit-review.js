@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const { campId, campName, reviewerName, childAge, sessionYear, rating, review } = req.body
+  const { campId, reviewerName, childAge, sessionYear, location, rating, review } = req.body
 
   if (!campId || !reviewerName || !rating || !review) {
     return res.status(400).json({ error: 'Missing required fields' })
@@ -20,7 +20,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    await submitReview(campId, campName, { reviewerName, childAge, sessionYear, rating, review })
+    await submitReview(campId, { reviewerName, childAge, sessionYear, location, rating, review })
     return res.status(200).json({ success: true })
   } catch (err) {
     console.error('Review submission error:', err)

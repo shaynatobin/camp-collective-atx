@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/router'
 import Image from 'next/image'
 import Link from 'next/link'
 import Head from 'next/head'
@@ -12,8 +13,8 @@ import { usePlanner } from '../../lib/PlannerContext'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://campcollectiveatx.com'
 
-function ReviewForm({ campId, campName }) {
-  const [form, setForm] = useState({ reviewerName: '', childAge: '', sessionYear: '', rating: 0, review: '' })
+function ReviewForm({ campId }) {
+  const [form, setForm] = useState({ reviewerName: '', childAge: '', sessionYear: '', location: '', rating: 0, review: '' })
   const [submitting, setSubmitting] = useState(false)
   const [status, setStatus] = useState(null) // 'success' | 'error'
   const [errorMsg, setErrorMsg] = useState('')
@@ -27,7 +28,7 @@ function ReviewForm({ campId, campName }) {
       const res = await fetch('/api/submit-review', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ campId, campName, ...form }),
+        body: JSON.stringify({ campId, ...form }),
       })
       const data = await res.json()
       if (res.ok) {
@@ -81,15 +82,27 @@ function ReviewForm({ campId, campName }) {
           />
         </div>
       </div>
-      <div>
-        <label className="block text-sm font-medium text-brand-ink mb-1">Session Year <span className="text-gray-400 font-normal">(optional)</span></label>
-        <input
-          type="text"
-          placeholder="e.g. 2025"
-          value={form.sessionYear}
-          onChange={(e) => setForm({ ...form, sessionYear: e.target.value })}
-          className="w-full sm:w-32 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-coral"
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-brand-ink mb-1">Session Year <span className="text-gray-400 font-normal">(optional)</span></label>
+          <input
+            type="text"
+            placeholder="e.g. 2026"
+            value={form.sessionYear}
+            onChange={(e) => setForm({ ...form, sessionYear: e.target.value })}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-coral"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-brand-ink mb-1">Your Location <span className="text-gray-400 font-normal">(optional)</span></label>
+          <input
+            type="text"
+            placeholder="e.g. Round Rock"
+            value={form.location}
+            onChange={(e) => setForm({ ...form, location: e.target.value })}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-coral"
+          />
+        </div>
       </div>
       <div>
         <label className="block text-sm font-medium text-brand-ink mb-1">Your Review *</label>
@@ -119,6 +132,17 @@ function ReviewForm({ campId, campName }) {
 export default function CampPage({ camp, relatedCamps, reviews }) {
   const [showForm, setShowForm] = useState(false)
   const { openAddModal } = usePlanner()
+  const router = useRouter()
+  const reviewsSectionRef = useRef(null)
+
+  // Deep link (e.g. /camps/slug?review=1) auto-opens the review form and
+  // scrolls to it, so outreach links can drop someone straight into it.
+  useEffect(() => {
+    if (router.query.review === '1') {
+      setShowForm(true)
+      reviewsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [router.query.review])
 
   if (!camp) return null
 
@@ -323,7 +347,7 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
         )}
 
         {/* Reviews section */}
-        <div className="mb-10 border-t border-gray-200 pt-10">
+        <div ref={reviewsSectionRef} className="mb-10 border-t border-gray-200 pt-10">
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-display text-2xl font-bold text-brand-ink">
               Parent Reviews
@@ -349,7 +373,7 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
                     <div>
                       <p className="font-semibold text-brand-ink text-sm">{r.reviewerName}</p>
                       <p className="text-xs text-gray-400">
-                        {[r.childAge && `Child age ${r.childAge}`, r.sessionYear && `Summer ${r.sessionYear}`].filter(Boolean).join(' · ')}
+                        {[r.location, r.childAge && `Child age ${r.childAge}`, r.sessionYear && `Summer ${r.sessionYear}`].filter(Boolean).join(' · ')}
                       </p>
                     </div>
                     <StarDisplay rating={r.rating} />
@@ -365,7 +389,7 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
           {showForm && (
             <div className="bg-brand-cream rounded-xl p-6 border border-gray-200">
               <h3 className="font-display text-lg font-bold text-brand-ink mb-4">Share Your Experience</h3>
-              <ReviewForm campId={camp.id} campName={camp.name} />
+              <ReviewForm campId={camp.id} />
             </div>
           )}
         </div>

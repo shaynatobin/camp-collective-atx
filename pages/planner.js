@@ -6,10 +6,23 @@ import Layout from '../components/Layout'
 import { getAllCamps } from '../lib/airtable'
 import { getCategoryGradient, getInitials, CATEGORY_LABELS } from '../lib/utils'
 
-const STORAGE_KEY = 'camp-planner-2026'
+const PLANNER_YEAR = 2027
+const STORAGE_KEY = `camp-planner-${PLANNER_YEAR}`
+
+// Camp weeks run Monday–Friday, so find the first Monday on/after June 1
+// rather than hardcoding a day — June 1 doesn't land on a Monday every year.
+function firstMondayOnOrAfter(year, month, day) {
+  const d = new Date(year, month, day)
+  const daysUntilMonday = (8 - d.getDay()) % 7
+  d.setDate(d.getDate() + daysUntilMonday)
+  return d
+}
+
+const SUMMER_START = firstMondayOnOrAfter(PLANNER_YEAR, 5, 1)
 
 const WEEKS = Array.from({ length: 12 }, (_, i) => {
-  const d = new Date(2026, 5, 1 + i * 7)
+  const d = new Date(SUMMER_START)
+  d.setDate(d.getDate() + i * 7)
   return {
     idx: i,
     label: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
@@ -239,7 +252,7 @@ export default function PlannerPage({ camps }) {
       <div className="bg-gradient-to-br from-brand-forest to-brand-forest-dark text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex items-end justify-between gap-4 flex-wrap">
           <div>
-            <p className="text-brand-sun text-xs font-semibold uppercase tracking-widest mb-1">Summer 2026</p>
+            <p className="text-brand-sun text-xs font-semibold uppercase tracking-widest mb-1">Summer {PLANNER_YEAR}</p>
             <h1 className="font-display text-3xl sm:text-4xl font-bold leading-tight">My Summer Planner</h1>
             <p className="text-white/70 mt-1 text-sm">Map out camps week by week for up to 3 kids.</p>
           </div>
