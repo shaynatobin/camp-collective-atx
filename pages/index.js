@@ -3,7 +3,8 @@ import Link from 'next/link'
 import Layout from '../components/Layout'
 import CampCard from '../components/CampCard'
 import { getAllCamps } from '../lib/airtable'
-import { FEATURED_CATEGORIES } from '../lib/utils'
+import { FEATURED_CATEGORIES, categoryLabel } from '../lib/utils'
+import { PLANNER_YEAR } from '../lib/season'
 
 export default function Home({ camps }) {
   const [search, setSearch] = useState('')
@@ -37,7 +38,7 @@ export default function Home({ camps }) {
             <span className="text-brand-coral">Austin Summer Camp</span>
           </h1>
           <p className="text-lg sm:text-xl text-brand-ink-soft mb-10 max-w-2xl mx-auto">
-            {camps.length}+ camps across sports, arts, STEM, nature, and more — all in Greater Austin.
+            {camps.length} camps across sports, arts, STEM, nature, and more, all in Greater Austin. Start planning summer {PLANNER_YEAR}.
           </p>
 
           {/* Search bar */}
@@ -56,7 +57,7 @@ export default function Home({ camps }) {
             >
               <option value="">All Categories</option>
               {categories.map((cat) => (
-                <option key={cat} value={cat}>{cat}</option>
+                <option key={cat} value={cat}>{categoryLabel(cat)}</option>
               ))}
             </select>
             <button
@@ -83,7 +84,7 @@ export default function Home({ camps }) {
             >
               <div className="text-3xl mb-2">{cat.emoji}</div>
               <div className="text-sm font-medium text-brand-ink group-hover:text-brand-coral transition-colors">
-                {cat.name}
+                {categoryLabel(cat.name)}
               </div>
             </Link>
           ))}
@@ -94,11 +95,11 @@ export default function Home({ camps }) {
       <section className="bg-brand-forest bg-opacity-10 border-y border-brand-forest border-opacity-20 py-8">
         <div className="max-w-4xl mx-auto px-4 grid grid-cols-3 gap-4 text-center">
           <div>
-            <div className="font-display text-3xl font-bold text-brand-coral">{camps.length}+</div>
+            <div className="font-display text-3xl font-bold text-brand-coral">{camps.length}</div>
             <div className="text-sm text-brand-ink-soft mt-1">Camps Listed</div>
           </div>
           <div>
-            <div className="font-display text-3xl font-bold text-brand-coral">10+</div>
+            <div className="font-display text-3xl font-bold text-brand-coral">{categories.length}</div>
             <div className="text-sm text-brand-ink-soft mt-1">Categories</div>
           </div>
           <div>
@@ -132,7 +133,7 @@ export default function Home({ camps }) {
             Run a camp in Austin?
           </h2>
           <p className="text-white/70 mb-8">
-            Get your camp in front of thousands of Austin parents searching for the perfect summer program.
+            Get your camp in front of Austin parents planning their summer. Listing is free.
           </p>
           <Link
             href="/submit-a-camp"

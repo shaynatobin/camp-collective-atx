@@ -5,7 +5,7 @@ import ShortlistDrawer from './ShortlistDrawer'
 
 const DEFAULT_TITLE = 'Camp Collective ATX | Austin Summer Camp Directory'
 const DEFAULT_DESCRIPTION =
-  'Find the perfect summer camp in Austin, TX. Browse 300+ camps in sports, arts, STEM, nature, and more across the Greater Austin area.'
+  'Find the right summer camp in Austin, TX. Browse hundreds of camps in sports, arts, STEM, nature, and more across Greater Austin, filtered by age, area, price and aftercare.'
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://campcollectiveatx.com'
 
 export default function Layout({ children, title, description, ogImage, canonical }) {

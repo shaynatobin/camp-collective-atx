@@ -5,30 +5,10 @@ import Link from 'next/link'
 import Layout from '../components/Layout'
 import { getAllCamps } from '../lib/airtable'
 import { getCategoryGradient, getInitials, CATEGORY_LABELS } from '../lib/utils'
+import { PLANNER_YEAR, SUMMER_WEEKS, formatSessionDates } from '../lib/season'
 
-const PLANNER_YEAR = 2027
 const STORAGE_KEY = `camp-planner-${PLANNER_YEAR}`
-
-// Camp weeks run Monday–Friday, so find the first Monday on/after June 1
-// rather than hardcoding a day — June 1 doesn't land on a Monday every year.
-function firstMondayOnOrAfter(year, month, day) {
-  const d = new Date(year, month, day)
-  const daysUntilMonday = (8 - d.getDay()) % 7
-  d.setDate(d.getDate() + daysUntilMonday)
-  return d
-}
-
-const SUMMER_START = firstMondayOnOrAfter(PLANNER_YEAR, 5, 1)
-
-const WEEKS = Array.from({ length: 12 }, (_, i) => {
-  const d = new Date(SUMMER_START)
-  d.setDate(d.getDate() + i * 7)
-  return {
-    idx: i,
-    label: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    month: d.toLocaleDateString('en-US', { month: 'long' }),
-  }
-})
+const WEEKS = SUMMER_WEEKS
 
 // Group weeks by month for the header
 const MONTH_GROUPS = (() => {
@@ -208,7 +188,7 @@ export default function PlannerPage({ camps }) {
     const slotList = Object.values(slots)
     let total = 0, priced = 0
     slotList.forEach(c => {
-      const rate = c.weeklyRate || parsePrice(c.priceRange)
+      const rate = c.weeklyRate || c.weeklyPriceMin || parsePrice(c.priceRange)
       if (rate) { total += rate; priced++ }
     })
     return { total, priced, unpriced: slotList.length - priced }
@@ -500,9 +480,7 @@ export default function PlannerPage({ camps }) {
                       {[
                         camp.city && `${camp.city}, TX`,
                         camp.priceRange,
-                        camp.sessionStart && camp.sessionEnd
-                          ? `${camp.sessionStart}–${camp.sessionEnd}`
-                          : camp.sessionStart || null,
+                        formatSessionDates(camp),
                       ].filter(Boolean).join(' · ')}
                     </p>
                   </div>
