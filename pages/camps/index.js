@@ -1,30 +1,10 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Layout from '../../components/Layout'
 import CampCard from '../../components/CampCard'
 import { getAllCamps } from '../../lib/airtable'
-import { CATEGORY_LABELS } from '../../lib/utils'
-
-// Parse "Ages 6–18", "Ages 5+", "All Ages", "K–12" → { min, max }
-function parseAgeRange(text) {
-  if (!text) return null
-  const t = text.toLowerCase()
-  if (t.includes('all ages')) return { min: 3, max: 18 }
-  const range = t.match(/(\d+)\s*[–\-]\s*(\d+)/)
-  if (range) return { min: parseInt(range[1]), max: parseInt(range[2]) }
-  const plus = t.match(/(\d+)\s*\+/)
-  if (plus) return { min: parseInt(plus[1]), max: 18 }
-  if (t.includes('k') && (t.includes('12') || t.includes('8'))) return { min: 5, max: 18 }
-  return null
-}
-
-// Extract a numeric price for sorting from text like "$400/week", "$240–$315/week"
-function parsePrice(text) {
-  if (!text) return null
-  const m = text.match(/\$?([\d,]+)/)
-  if (!m) return null
-  return parseInt(m[1].replace(/,/g, ''))
-}
+import { categoryLabel, campAgeRange, campWeeklyPrice, latestHour } from '../../lib/utils'
+import { SUMMER_WEEKS, PLANNER_YEAR, campRunsDuringWeek } from '../../lib/season'
 
 const SPORT_KEYWORDS = {
   'Soccer': ['soccer', 'futbol'],
@@ -52,52 +32,45 @@ function detectSport(camp) {
   return 'Multi-Sport'
 }
 
-// Detect if camp hours cover a full workday (pickup 4pm or later)
-function isFullDay(hoursText) {
-  if (!hoursText) return false
-  const t = hoursText.toLowerCase()
+// Full workday: Day Length says Full day, or pickup is 4pm or later.
+function isFullDay(camp) {
+  if (camp.dayLength?.includes('Full day')) return true
+  const t = (camp.hours || '').toLowerCase()
   if (t.includes('full') && t.includes('day')) return true
-  const times = [...t.matchAll(/(\d+)(?::(\d+))?\s*(am|pm)/g)]
-  let latest = 0
-  for (const m of times) {
-    let h = parseInt(m[1])
-    if (m[3] === 'pm' && h !== 12) h += 12
-    if (m[3] === 'am' && h === 12) h = 0
-    latest = Math.max(latest, h)
-  }
-  return latest >= 16
+  const latest = latestHour(camp.latestPickup) ?? latestHour(camp.hours)
+  return latest != null && latest >= 16
 }
 
-// Detect aftercare: explicit keywords OR closes at 5pm or later
-function hasAftercareHours(hoursText) {
-  if (!hoursText) return false
-  const t = hoursText.toLowerCase()
-  if (/aftercare|extended care|extended day|wrap.?around/.test(t)) return true
-  const times = [...t.matchAll(/(\d+)(?::(\d+))?\s*(am|pm)/g)]
-  let latest = 0
-  for (const m of times) {
-    let h = parseInt(m[1])
-    if (m[3] === 'pm' && h !== 12) h += 12
-    if (m[3] === 'am' && h === 12) h = 0
-    latest = Math.max(latest, h)
-  }
-  return latest >= 17
+// Aftercare: the Aftercare Available box, a pickup of 5pm or later, or the
+// listing's hours/extended-care text says so.
+function hasAftercare(camp) {
+  if (camp.aftercare) return true
+  const latest = latestHour(camp.latestPickup) ?? latestHour(camp.hours)
+  if (latest != null && latest >= 17) return true
+  const t = `${camp.hours || ''} ${camp.extendedCare || ''}`.toLowerCase()
+  if (camp.extendedCare && !/^\s*(no|none|n\/a|not offered)/i.test(camp.extendedCare)) return true
+  return /aftercare|after care|extended care|extended day|wrap.?around/.test(t)
 }
 
 function hasFinancialAid(camp) {
-  const text = ((camp.description || '') + ' ' + (camp.specialFeatures || '') + ' ' + (camp.priceRange || '')).toLowerCase()
+  if (camp.financialAid) return true
+  const text = ((camp.description || '') + ' ' + (camp.specialFeatures || '') + ' ' + (camp.priceRange || '') + ' ' + (camp.priceNotes || '')).toLowerCase()
   return /scholarship|campership|financial aid|need.based|sliding scale|subsid|reduced.fee|assistance available/.test(text)
 }
 
 function hasMealsIncluded(camp) {
+  if (camp.mealsIncluded) return true
   const text = ((camp.description || '') + ' ' + (camp.specialFeatures || '') + ' ' + (camp.hours || '')).toLowerCase()
   return /meals?\s+(included|provided|served)|lunch\s+(included|provided)|breakfast\s+(included|provided)|snacks?\s+provided|food\s+provided/.test(text)
 }
 
 function hasTransportation(camp) {
+  if (camp.transportation) return true
   const text = ((camp.description || '') + ' ' + (camp.specialFeatures || '')).toLowerCase()
   return /\bbus\b(?:\s+service|\s+pickup|\s+transport)?|shuttle|transportation\s+(provided|available)|bus\s+pickup/.test(text)
 }
+
+const PRICE_CAPS = [200, 300, 400, 500, 750]
 
 export default function CampsPage({ camps }) {
   const router = useRouter()
@@ -110,7 +83,10 @@ export default function CampsPage({ camps }) {
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
   const [city, setCity] = useState('')
+  const [region, setRegion] = useState('')
   const [campType, setCampType] = useState('')
+  const [week, setWeek] = useState('')
+  const [maxPrice, setMaxPrice] = useState('')
   const [fullDayOnly, setFullDayOnly] = useState(false)
   const [aftercareOnly, setAftercareOnly] = useState(false)
   const [financialAidOnly, setFinancialAidOnly] = useState(false)
@@ -121,8 +97,25 @@ export default function CampsPage({ camps }) {
   const [sort, setSort] = useState('az')
   const [sportFilter, setSportFilter] = useState('All')
 
+  // The home page search sends ?q= and ?category= here.
+  useEffect(() => {
+    if (!router.isReady) return
+    const { q, category: cat, region: reg } = router.query
+    if (typeof q === 'string') setSearch(q)
+    if (typeof cat === 'string') setCategory(cat)
+    if (typeof reg === 'string') setRegion(reg)
+  }, [router.isReady]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const regions = useMemo(() => {
+    return [...new Set(camps.map((c) => c.region).filter(Boolean))].sort()
+  }, [camps])
+
+  // Only offer the week filter once some listings have real dates.
+  const campsWithDates = useMemo(() => camps.filter((c) => c.firstSessionStart).length, [camps])
+
   const categories = useMemo(() => {
-    return [...new Set(camps.map((c) => c.category).filter(Boolean))].sort()
+    return [...new Set(camps.map((c) => c.category).filter(Boolean))]
+      .sort((a, b) => categoryLabel(a).localeCompare(categoryLabel(b)))
   }, [camps])
 
   const cities = useMemo(() => {
@@ -137,20 +130,30 @@ export default function CampsPage({ camps }) {
     const a1 = age1 ? parseInt(age1) : null
     const a2 = age2 ? parseInt(age2) : null
 
+    const q = search.trim().toLowerCase()
+    const cap = maxPrice ? parseInt(maxPrice, 10) : null
+    const weekObj = week !== '' ? SUMMER_WEEKS[parseInt(week, 10)] : null
+
     return camps.filter((camp) => {
       if (sharedSlugs && !sharedSlugs.has(camp.slug)) return false
-      if (search && !camp.name.toLowerCase().includes(search.toLowerCase())) return false
+      if (q && !`${camp.name} ${camp.city} ${camp.region}`.toLowerCase().includes(q)) return false
+      if (region && camp.region !== region) return false
+      if (weekObj && campRunsDuringWeek(camp, weekObj) !== true) return false
+      if (cap !== null) {
+        const p = campWeeklyPrice(camp)
+        if (p === null || p > cap) return false
+      }
       if (category && camp.category !== category) return false
       if (category === 'Sports & Athletics' && sportFilter !== 'All' && detectSport(camp) !== sportFilter) return false
       if (city && camp.city !== city) return false
       if (campType && camp.campType !== campType) return false
-      if (fullDayOnly && !isFullDay(camp.hours)) return false
-      if (aftercareOnly && !hasAftercareHours(camp.hours)) return false
+      if (fullDayOnly && !isFullDay(camp)) return false
+      if (aftercareOnly && !hasAftercare(camp)) return false
       if (financialAidOnly && !hasFinancialAid(camp)) return false
       if (mealsOnly && !hasMealsIncluded(camp)) return false
       if (transportOnly && !hasTransportation(camp)) return false
       if (a1 !== null || a2 !== null) {
-        const range = parseAgeRange(camp.ageRange)
+        const range = campAgeRange(camp)
         if (!range) return false
         if (a1 !== null && (a1 < range.min || a1 > range.max)) return false
         if (a2 !== null && (a2 < range.min || a2 > range.max)) return false
@@ -160,18 +163,21 @@ export default function CampsPage({ camps }) {
       if (sort === 'az') return a.name.localeCompare(b.name)
       if (sort === 'za') return b.name.localeCompare(a.name)
       if (sort === 'price-asc') {
-        const pa = parsePrice(a.priceRange) ?? Infinity
-        const pb = parsePrice(b.priceRange) ?? Infinity
-        return pa - pb
+        const pa = campWeeklyPrice(a) ?? Infinity
+        const pb = campWeeklyPrice(b) ?? Infinity
+        return pa - pb || a.name.localeCompare(b.name)
       }
       if (sort === 'price-desc') {
-        const pa = parsePrice(a.priceRange) ?? -1
-        const pb = parsePrice(b.priceRange) ?? -1
-        return pb - pa
+        const pa = campWeeklyPrice(a) ?? -1
+        const pb = campWeeklyPrice(b) ?? -1
+        return pb - pa || a.name.localeCompare(b.name)
+      }
+      if (sort === 'rating') {
+        return (b.rating ?? 0) - (a.rating ?? 0) || (b.reviewCount - a.reviewCount) || a.name.localeCompare(b.name)
       }
       return 0
     })
-  }, [camps, sharedSlugs, search, category, sportFilter, city, campType, fullDayOnly, aftercareOnly, financialAidOnly, mealsOnly, transportOnly, age1, age2, sort])
+  }, [camps, sharedSlugs, search, region, week, maxPrice, category, sportFilter, city, campType, fullDayOnly, aftercareOnly, financialAidOnly, mealsOnly, transportOnly, age1, age2, sort])
 
   const isSports = category === 'Sports & Athletics'
 
@@ -196,6 +202,9 @@ export default function CampsPage({ camps }) {
     setCategory('')
     setSportFilter('All')
     setCity('')
+    setRegion('')
+    setWeek('')
+    setMaxPrice('')
     setCampType('')
     setFullDayOnly(false)
     setAftercareOnly(false)
@@ -207,12 +216,12 @@ export default function CampsPage({ camps }) {
     setSort('az')
   }
 
-  const hasFilters = search || category || city || campType || fullDayOnly || aftercareOnly || financialAidOnly || mealsOnly || transportOnly || age1 || age2 || sort !== 'az'
+  const hasFilters = search || category || city || region || week !== '' || maxPrice || campType || fullDayOnly || aftercareOnly || financialAidOnly || mealsOnly || transportOnly || age1 || age2 || sort !== 'az'
 
   return (
     <Layout
       title="Browse Austin Summer Camps | Camp Collective ATX"
-      description={`Browse all ${camps.length}+ summer camps in Austin, TX and the greater area. Filter by category, city, and camp type to find the perfect fit.`}
+      description={`Browse ${camps.length} summer camps in Austin, TX and the greater area. Filter by age, area, price, aftercare and more for summer ${PLANNER_YEAR}.`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Page header */}
@@ -223,7 +232,7 @@ export default function CampsPage({ camps }) {
           <p className="text-gray-600">
             {sharedSlugs
               ? `Someone shared ${sharedSlugs.size} camp${sharedSlugs.size !== 1 ? 's' : ''} with you.`
-              : `${camps.length}+ camps across Greater Austin — sports, arts, STEM, nature, and more.`}
+              : `${camps.length} camps across Greater Austin for summer ${PLANNER_YEAR}: sports, arts, STEM, nature, and more.`}
           </p>
         </div>
 
@@ -243,22 +252,36 @@ export default function CampsPage({ camps }) {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name..."
+              placeholder="Search by name or area..."
+              aria-label="Search camps"
               className="px-3 py-2.5 rounded-lg border border-gray-300 text-sm text-brand-ink placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-coral"
             />
             <select
               value={category}
               onChange={(e) => { setCategory(e.target.value); setSportFilter('All') }}
+              aria-label="Category"
               className="px-3 py-2.5 rounded-lg border border-gray-300 text-sm text-brand-ink bg-white focus:outline-none focus:ring-2 focus:ring-brand-coral"
             >
               <option value="">All Categories</option>
               {categories.map((cat) => (
-                <option key={cat} value={cat}>{CATEGORY_LABELS[cat] || cat}</option>
+                <option key={cat} value={cat}>{categoryLabel(cat)}</option>
+              ))}
+            </select>
+            <select
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              aria-label="Area"
+              className="px-3 py-2.5 rounded-lg border border-gray-300 text-sm text-brand-ink bg-white focus:outline-none focus:ring-2 focus:ring-brand-coral"
+            >
+              <option value="">All Areas</option>
+              {regions.map((r) => (
+                <option key={r} value={r}>{r}</option>
               ))}
             </select>
             <select
               value={city}
               onChange={(e) => setCity(e.target.value)}
+              aria-label="City"
               className="px-3 py-2.5 rounded-lg border border-gray-300 text-sm text-brand-ink bg-white focus:outline-none focus:ring-2 focus:ring-brand-coral"
             >
               <option value="">All Cities</option>
@@ -266,19 +289,9 @@ export default function CampsPage({ camps }) {
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
-            <select
-              value={campType}
-              onChange={(e) => setCampType(e.target.value)}
-              className="px-3 py-2.5 rounded-lg border border-gray-300 text-sm text-brand-ink bg-white focus:outline-none focus:ring-2 focus:ring-brand-coral"
-            >
-              <option value="">All Types</option>
-              {campTypes.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
           </div>
 
-          {/* Row 2: sibling ages */}
+          {/* Row 2: ages, week, price, type */}
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
               <span className="text-sm text-brand-ink-soft whitespace-nowrap">Child ages:</span>
@@ -288,6 +301,7 @@ export default function CampsPage({ camps }) {
                 value={age1}
                 onChange={(e) => setAge1(e.target.value)}
                 placeholder="e.g. 7"
+                aria-label="First child's age"
                 className="w-20 px-3 py-2 rounded-lg border border-gray-300 text-sm text-brand-ink focus:outline-none focus:ring-2 focus:ring-brand-coral"
               />
               <span className="text-sm text-brand-ink-soft">&</span>
@@ -297,10 +311,51 @@ export default function CampsPage({ camps }) {
                 value={age2}
                 onChange={(e) => setAge2(e.target.value)}
                 placeholder="e.g. 11"
+                aria-label="Second child's age (optional)"
                 className="w-20 px-3 py-2 rounded-lg border border-gray-300 text-sm text-brand-ink focus:outline-none focus:ring-2 focus:ring-brand-coral"
               />
             </div>
+            {campsWithDates > 0 && (
+              <select
+                value={week}
+                onChange={(e) => setWeek(e.target.value)}
+                aria-label="Week of summer"
+                className="px-3 py-2 rounded-lg border border-gray-300 text-sm text-brand-ink bg-white focus:outline-none focus:ring-2 focus:ring-brand-coral"
+              >
+                <option value="">Any week</option>
+                {SUMMER_WEEKS.map((w) => (
+                  <option key={w.idx} value={w.idx}>Week of {w.label}</option>
+                ))}
+              </select>
+            )}
+            <select
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+              aria-label="Maximum price per week"
+              className="px-3 py-2 rounded-lg border border-gray-300 text-sm text-brand-ink bg-white focus:outline-none focus:ring-2 focus:ring-brand-coral"
+            >
+              <option value="">Any price</option>
+              {PRICE_CAPS.map((p) => (
+                <option key={p} value={p}>Up to ${p}/week</option>
+              ))}
+            </select>
+            <select
+              value={campType}
+              onChange={(e) => setCampType(e.target.value)}
+              aria-label="Camp type"
+              className="px-3 py-2 rounded-lg border border-gray-300 text-sm text-brand-ink bg-white focus:outline-none focus:ring-2 focus:ring-brand-coral"
+            >
+              <option value="">All Types</option>
+              {campTypes.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
           </div>
+          {(age1 || age2 || maxPrice || week !== '') && (
+            <p className="text-xs text-brand-ink-soft">
+              Camps that haven't listed {[(age1 || age2) && 'ages', maxPrice && 'a weekly price', week !== '' && 'dates'].filter(Boolean).join(' or ')} are hidden while this filter is on.
+            </p>
+          )}
 
           {/* Row 3: feature filter chips */}
           <div className="flex flex-wrap gap-2">
@@ -314,6 +369,7 @@ export default function CampsPage({ camps }) {
               <button
                 key={label}
                 onClick={() => set(!state)}
+                aria-pressed={state}
                 className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors duration-150 ${
                   state
                     ? 'bg-brand-forest text-white border-brand-forest'
@@ -359,12 +415,14 @@ export default function CampsPage({ camps }) {
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value)}
+              aria-label="Sort camps"
               className="px-3 py-1.5 rounded-lg border border-gray-300 text-sm text-brand-ink bg-white focus:outline-none focus:ring-2 focus:ring-brand-coral"
             >
               <option value="az">A–Z</option>
               <option value="za">Z–A</option>
               <option value="price-asc">Price: Low to High</option>
               <option value="price-desc">Price: High to Low</option>
+              <option value="rating">Top rated</option>
             </select>
             {hasFilters && (
               <button onClick={clearFilters} className="text-sm text-brand-coral hover:underline">

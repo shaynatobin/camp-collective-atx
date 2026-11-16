@@ -5,7 +5,9 @@ import Image from 'next/image'
 import CategoryBadge from './CategoryBadge'
 import { useShortlist } from '../lib/ShortlistContext'
 import { usePlanner } from '../lib/PlannerContext'
-import { getInitials, getCategoryGradient } from '../lib/utils'
+import { getInitials, getCategoryGradient, formatAges, formatWeeklyPrice } from '../lib/utils'
+import { seasonNote } from '../lib/season'
+import { StarDisplay } from './StarRating'
 
 export default function CampCard({ camp }) {
   const gradient = getCategoryGradient(camp.category)
@@ -14,6 +16,9 @@ export default function CampCard({ camp }) {
   const { toggle, isInShortlist } = useShortlist()
   const { openAddModal } = usePlanner()
   const saved = isInShortlist(camp.id)
+  const ages = formatAges(camp)
+  const price = formatWeeklyPrice(camp) || camp.priceRange
+  const note = seasonNote(camp)
 
   return (
     <div
@@ -40,22 +45,27 @@ export default function CampCard({ camp }) {
         )}
 
         {/* Action buttons */}
-        <div className="absolute top-2 right-2 flex flex-col gap-1.5">
+        <div className="absolute top-2 right-2 flex flex-col items-end gap-1.5">
           <button
             onClick={(e) => { e.stopPropagation(); toggle(camp) }}
-            className={`w-8 h-8 rounded-full flex items-center justify-center shadow transition-colors duration-150 ${
-              saved ? 'bg-brand-coral text-white' : 'bg-white text-gray-400 hover:text-brand-coral'
+            className={`h-8 px-2.5 rounded-full flex items-center gap-1 shadow text-xs font-medium transition-colors duration-150 ${
+              saved ? 'bg-brand-coral text-white' : 'bg-white text-brand-ink-soft hover:text-brand-coral'
             }`}
-            title={saved ? 'Remove from shortlist' : 'Save to shortlist'}
+            aria-pressed={saved}
+            aria-label={saved ? `Remove ${camp.name} from your saved camps` : `Save ${camp.name} to compare later`}
+            title={saved ? 'Remove from saved camps' : 'Save to compare later'}
           >
-            {saved ? '♥' : '♡'}
+            <span aria-hidden="true">{saved ? '♥' : '♡'}</span>
+            {saved ? 'Saved' : 'Save'}
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); openAddModal(camp) }}
-            className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow text-gray-400 hover:text-brand-forest transition-colors duration-150 text-sm"
-            title="Add to Summer Planner"
+            className="h-8 px-2.5 rounded-full bg-white flex items-center gap-1 shadow text-xs font-medium text-brand-ink-soft hover:text-brand-forest transition-colors duration-150"
+            aria-label={`Add ${camp.name} to a week in your summer planner`}
+            title="Add to a week in your summer planner"
           >
-            📅
+            <span aria-hidden="true">📅</span>
+            Plan
           </button>
         </div>
       </div>
@@ -70,15 +80,32 @@ export default function CampCard({ camp }) {
           {camp.name}
         </h3>
 
-        <div className="flex items-center gap-2 text-sm text-brand-ink-soft mb-2">
+        {camp.reviewCount > 0 && (
+          <div className="flex items-center gap-1.5 text-sm text-brand-ink-soft mb-1" aria-label={`Rated ${camp.rating} out of 5 from ${camp.reviewCount} parent review${camp.reviewCount !== 1 ? 's' : ''}`}>
+            <StarDisplay rating={Math.round(camp.rating)} />
+            <span>{camp.rating} ({camp.reviewCount})</span>
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-brand-ink-soft mb-2">
           {camp.city && <span>📍 {camp.city}, TX</span>}
-          {camp.priceRange && (
+          {ages && (
             <>
-              <span>·</span>
-              <span>{camp.priceRange}</span>
+              <span aria-hidden="true">·</span>
+              <span>{ages}</span>
+            </>
+          )}
+          {price && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span>{price}</span>
             </>
           )}
         </div>
+
+        {note && (
+          <p className="text-xs text-amber-800 bg-amber-50 rounded-md px-2 py-1 mb-2 self-start">{note}</p>
+        )}
 
         {camp.description && (
           <p className="text-sm text-brand-ink-soft line-clamp-2 mb-4 flex-grow">

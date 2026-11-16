@@ -2,7 +2,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useShortlist } from '../lib/ShortlistContext'
-import { getCategoryGradient, getInitials, CATEGORY_LABELS } from '../lib/utils'
+import { getCategoryGradient, getInitials, categoryLabel, formatAges, formatWeeklyPrice } from '../lib/utils'
+import { formatSessionDates } from '../lib/season'
 
 function CampThumb({ camp }) {
   const gradient = getCategoryGradient(camp.category)
@@ -22,11 +23,13 @@ function CampThumb({ camp }) {
 
 function CompareView({ camps, onBack }) {
   const rows = [
-    { label: 'Category', key: (c) => CATEGORY_LABELS[c.category] || c.category },
+    { label: 'Category', key: (c) => categoryLabel(c.category) },
     { label: 'City', key: (c) => c.city ? `${c.city}, TX` : '—' },
-    { label: 'Price', key: (c) => c.priceRange || '—' },
-    { label: 'Hours', key: (c) => c.hours || '—' },
-    { label: 'Sessions', key: (c) => c.sessionStart ? `${c.sessionStart}${c.sessionEnd && c.sessionEnd !== c.sessionStart ? ` – ${c.sessionEnd}` : ''}` : '—' },
+    { label: 'Ages', key: (c) => formatAges(c) || '—' },
+    { label: 'Price', key: (c) => formatWeeklyPrice(c) || c.priceRange || '—' },
+    { label: 'Hours', key: (c) => (c.dayStart && c.latestPickup ? `${c.dayStart} – ${c.latestPickup}` : c.hours) || '—' },
+    { label: 'Aftercare', key: (c) => (c.aftercare ? 'Yes' : '—') },
+    { label: 'Dates', key: (c) => formatSessionDates(c) || (c.season ? `Summer ${c.season} (dates not listed)` : '—') },
     { label: 'Camp Type', key: (c) => c.campType || '—' },
   ]
 
@@ -156,7 +159,7 @@ export default function ShortlistDrawer() {
                       {camp.name}
                     </Link>
                     <p className="text-xs text-brand-ink-soft mt-0.5">
-                      {[camp.city && `${camp.city}, TX`, camp.priceRange].filter(Boolean).join(' · ')}
+                      {[camp.city && `${camp.city}, TX`, formatWeeklyPrice(camp) || camp.priceRange].filter(Boolean).join(' · ')}
                     </p>
                   </div>
                   <button

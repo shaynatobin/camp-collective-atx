@@ -31,6 +31,7 @@ export default function PrivacyPolicy() {
             <ul className="list-disc pl-5 space-y-1">
               <li>Your name and email address when you submit a camp listing or contact us</li>
               <li>Camp details (name, website, category, description) when you use our camp submission form</li>
+              <li>Your name, email address and review when you review a camp. Your email is only used to confirm you're a real parent and is never shown on the Site.</li>
             </ul>
             <p className="mt-3"><strong>Information collected automatically:</strong></p>
             <ul className="list-disc pl-5 space-y-1">

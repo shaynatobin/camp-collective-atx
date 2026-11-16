@@ -8,13 +8,15 @@ import CampCard from '../../components/CampCard'
 import CategoryBadge from '../../components/CategoryBadge'
 import { StarDisplay, StarInput } from '../../components/StarRating'
 import { getAllCamps, getReviewsForCamp } from '../../lib/airtable'
-import { getCategoryGradient, truncate } from '../../lib/utils'
+import { getCategoryGradient, truncate, categoryLabel, formatAges, formatWeeklyPrice } from '../../lib/utils'
+import { formatSessionDates, seasonNote, PLANNER_YEAR } from '../../lib/season'
 import { usePlanner } from '../../lib/PlannerContext'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://campcollectiveatx.com'
 
 function ReviewForm({ campId }) {
-  const [form, setForm] = useState({ reviewerName: '', childAge: '', sessionYear: '', location: '', rating: 0, review: '' })
+  const [form, setForm] = useState({ reviewerName: '', reviewerEmail: '', childAge: '', sessionYear: '', location: '', rating: 0, review: '', website: '' })
+  const [startedAt] = useState(() => Date.now())
   const [submitting, setSubmitting] = useState(false)
   const [status, setStatus] = useState(null) // 'success' | 'error'
   const [errorMsg, setErrorMsg] = useState('')
@@ -28,7 +30,7 @@ function ReviewForm({ campId }) {
       const res = await fetch('/api/submit-review', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ campId, ...form }),
+        body: JSON.stringify({ campId, startedAt, ...form }),
       })
       const data = await res.json()
       if (res.ok) {
@@ -48,13 +50,13 @@ function ReviewForm({ campId }) {
       <div className="bg-brand-forest bg-opacity-10 border border-brand-forest border-opacity-30 rounded-xl p-6 text-center">
         <div className="text-2xl mb-2">🎉</div>
         <p className="font-semibold text-brand-ink">Thank you for your review!</p>
-        <p className="text-sm text-gray-600 mt-1">It will appear here after moderation, usually within a day or two.</p>
+        <p className="text-sm text-gray-600 mt-1">We read every review before it goes up. Yours should appear here within a few days.</p>
       </div>
     )
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 relative">
       <div>
         <label className="block text-sm font-medium text-brand-ink mb-1">Your Rating *</label>
         <StarInput value={form.rating} onChange={(r) => setForm({ ...form, rating: r })} />
@@ -82,12 +84,37 @@ function ReviewForm({ campId }) {
           />
         </div>
       </div>
+      <div>
+        <label className="block text-sm font-medium text-brand-ink mb-1">Your Email *</label>
+        <input
+          type="email"
+          required
+          placeholder="you@example.com"
+          value={form.reviewerEmail}
+          onChange={(e) => setForm({ ...form, reviewerEmail: e.target.value })}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-coral"
+        />
+        <p className="text-xs text-gray-500 mt-1">Only used to confirm you're a real parent. Never shown or shared.</p>
+      </div>
+      {/* Honeypot: hidden from people, bots fill it in */}
+      <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>
+        <label>
+          Website
+          <input
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            value={form.website}
+            onChange={(e) => setForm({ ...form, website: e.target.value })}
+          />
+        </label>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-brand-ink mb-1">Session Year <span className="text-gray-400 font-normal">(optional)</span></label>
           <input
             type="text"
-            placeholder="e.g. 2026"
+            placeholder={`e.g. ${PLANNER_YEAR - 1}`}
             value={form.sessionYear}
             onChange={(e) => setForm({ ...form, sessionYear: e.target.value })}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-coral"
@@ -108,7 +135,8 @@ function ReviewForm({ campId }) {
         <label className="block text-sm font-medium text-brand-ink mb-1">Your Review *</label>
         <textarea
           required
-          minLength={10}
+          minLength={20}
+          maxLength={3000}
           rows={4}
           placeholder="Tell other parents what you and your child loved (or didn't) about this camp..."
           value={form.review}
@@ -124,7 +152,7 @@ function ReviewForm({ campId }) {
       >
         {submitting ? 'Submitting…' : 'Submit Review'}
       </button>
-      <p className="text-xs text-gray-400">Reviews are moderated before publishing.</p>
+      <p className="text-xs text-gray-400">Reviews are checked by a person before they're published.</p>
     </form>
   )
 }
@@ -182,6 +210,12 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
     }),
   }
 
+  const ages = formatAges(camp)
+  const price = formatWeeklyPrice(camp) || camp.priceRange
+  const sessionDates = formatSessionDates(camp) || (camp.season && !seasonNote(camp) ? `Summer ${camp.season}` : '')
+  const hours = camp.dayStart && camp.latestPickup ? `${camp.dayStart} – ${camp.latestPickup}` : camp.hours
+  const note = seasonNote(camp)
+
   const features = camp.specialFeatures
     ? camp.specialFeatures.split('\n').filter((f) => f.trim())
     : []
@@ -208,7 +242,7 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
                 href={`/category/${camp.category.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
                 className="hover:text-brand-coral"
               >
-                {camp.category}
+                {categoryLabel(camp.category)}
               </Link>
             </>
           )}
@@ -234,22 +268,32 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
           <div className="flex flex-wrap gap-4 text-sm text-gray-600">
             {camp.city && (
               <span className="flex items-center gap-1">
-                📍 {camp.city}, TX
+                📍 {camp.city}, TX{camp.region && camp.region !== camp.city ? ` · ${camp.region}` : ''}
               </span>
             )}
-            {camp.priceRange && (
+            {price && (
               <span className="flex items-center gap-1">
-                💰 {camp.priceRange}
+                💰 {price}
               </span>
             )}
-            {camp.hours && (
+            {hours && (
               <span className="flex items-center gap-1">
-                🕐 {camp.hours}
+                🕐 {hours}
               </span>
             )}
-            {(camp.sessionStart || camp.sessionEnd) && (
+            {ages && (
               <span className="flex items-center gap-1">
-                📅 {camp.sessionStart}{camp.sessionEnd && camp.sessionEnd !== camp.sessionStart ? ` – ${camp.sessionEnd}` : ''}
+                👧 {ages}
+              </span>
+            )}
+            {sessionDates && (
+              <span className="flex items-center gap-1">
+                📅 {sessionDates}
+              </span>
+            )}
+            {camp.aftercare && (
+              <span className="flex items-center gap-1">
+                ⏰ Aftercare available{camp.latestPickup ? ` (until ${camp.latestPickup})` : ''}
               </span>
             )}
             {avgRating && (
@@ -259,6 +303,11 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
               </span>
             )}
           </div>
+          {note && (
+            <p className="mt-3 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 inline-block">
+              Dates and prices shown are from summer {camp.season}. {PLANNER_YEAR} details aren't posted yet, so check the camp's website.
+            </p>
+          )}
         </div>
 
         {/* Photo or gradient placeholder */}
@@ -398,7 +447,7 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
         {relatedCamps.length > 0 && (
           <div className="border-t border-gray-200 pt-10">
             <h2 className="font-display text-2xl font-bold text-brand-ink mb-6">
-              More {camp.category} Camps
+              More {categoryLabel(camp.category)} Camps
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {relatedCamps.map((c) => (
@@ -410,7 +459,7 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
                 href={`/category/${camp.category.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
                 className="text-sm font-medium text-brand-coral hover:underline"
               >
-                See all {camp.category} camps →
+                See all {categoryLabel(camp.category)} camps →
               </Link>
             </div>
           </div>
