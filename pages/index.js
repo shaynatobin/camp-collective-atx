@@ -11,7 +11,8 @@ export default function Home({ camps }) {
   const [category, setCategory] = useState('')
 
   const categories = useMemo(() => {
-    const cats = [...new Set(camps.map((c) => c.category).filter(Boolean))].sort()
+    const cats = [...new Set(camps.map((c) => c.category).filter(Boolean))]
+      .sort((a, b) => categoryLabel(a).localeCompare(categoryLabel(b)))
     return cats
   }, [camps])
 

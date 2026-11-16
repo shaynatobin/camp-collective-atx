@@ -212,7 +212,7 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
 
   const ages = formatAges(camp)
   const price = formatWeeklyPrice(camp) || camp.priceRange
-  const sessionDates = formatSessionDates(camp) || (camp.season ? `Summer ${camp.season}` : '')
+  const sessionDates = formatSessionDates(camp) || (camp.season && !seasonNote(camp) ? `Summer ${camp.season}` : '')
   const hours = camp.dayStart && camp.latestPickup ? `${camp.dayStart} – ${camp.latestPickup}` : camp.hours
   const note = seasonNote(camp)
 

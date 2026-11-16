@@ -114,7 +114,8 @@ export default function CampsPage({ camps }) {
   const campsWithDates = useMemo(() => camps.filter((c) => c.firstSessionStart).length, [camps])
 
   const categories = useMemo(() => {
-    return [...new Set(camps.map((c) => c.category).filter(Boolean))].sort()
+    return [...new Set(camps.map((c) => c.category).filter(Boolean))]
+      .sort((a, b) => categoryLabel(a).localeCompare(categoryLabel(b)))
   }, [camps])
 
   const cities = useMemo(() => {
