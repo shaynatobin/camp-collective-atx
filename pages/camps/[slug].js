@@ -159,6 +159,7 @@ function ReviewForm({ campId }) {
 
 export default function CampPage({ camp, relatedCamps, reviews }) {
   const [showForm, setShowForm] = useState(false)
+  const [photoFailed, setPhotoFailed] = useState(false)
   const { openAddModal } = usePlanner()
   const router = useRouter()
   const reviewsSectionRef = useRef(null)
@@ -312,7 +313,7 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
 
         {/* Photo or gradient placeholder */}
         {(() => {
-          if (!camp.photo) {
+          if (!camp.photo || photoFailed) {
             return (
               <div className={`relative w-full h-64 sm:h-80 rounded-2xl overflow-hidden mb-8 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
                 <span className="text-white text-5xl font-display font-bold opacity-60">
@@ -330,6 +331,7 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
                 className={camp.isLogo ? 'object-contain p-8' : 'object-cover'}
                 sizes="(max-width: 768px) 100vw, 800px"
                 priority
+                onError={() => setPhotoFailed(true)}
               />
             </div>
           )
