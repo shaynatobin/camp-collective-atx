@@ -97,7 +97,7 @@ export default function SubmitACamp() {
               value={form.name}
               onChange={handleChange}
               className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-coral text-brand-ink"
-              placeholder="e.g. Barton Springs Summer Camp"
+              placeholder={`e.g. ${SITE.exampleCampName}`}
             />
           </div>
 

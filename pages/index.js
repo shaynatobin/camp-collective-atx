@@ -26,8 +26,11 @@ export default function Home({ camps }) {
   }, [camps])
 
   const featured = useMemo(() => {
-    const withPhoto = camps.filter((c) => c.photo)
-    return (withPhoto.length >= 6 ? withPhoto : camps).slice(0, 6)
+    // Outside Austin, lead with the city's own camps, not ones shared with Austin.
+    const own = SITE.key === 'austin' ? camps : camps.filter((c) => !c.sharedMetro)
+    const pool = own.length >= 6 ? own : camps
+    const withPhoto = pool.filter((c) => c.photo)
+    return (withPhoto.length >= 6 ? withPhoto : pool).slice(0, 6)
   }, [camps])
 
   function handleSearch(e) {
@@ -57,7 +60,7 @@ export default function Home({ camps }) {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Try soccer, coding, Round Rock..."
+              placeholder={`Try soccer, coding, ${SITE.exampleTown}...`}
               aria-label="Search camps"
               className="flex-grow min-w-0 px-4 py-3 rounded-xl border border-brand-border text-brand-ink placeholder-brand-ink-soft focus:outline-none focus:ring-2 focus:ring-brand-coral bg-white"
             />

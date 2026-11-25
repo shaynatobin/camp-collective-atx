@@ -131,7 +131,7 @@ function ReviewForm({ campId }) {
           <label htmlFor="review-location" className="block text-sm font-medium text-brand-ink mb-1">Your Location <span className="text-gray-400 font-normal">(optional)</span></label>
           <input
             type="text"
-            placeholder="e.g. Round Rock"
+            placeholder={`e.g. ${SITE.exampleTown}`}
             id="review-location"
             value={form.location}
             onChange={(e) => setForm({ ...form, location: e.target.value })}

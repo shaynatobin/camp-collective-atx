@@ -152,7 +152,7 @@ export default function TermsOfService() {
             <p>
               These Terms are governed by and construed in accordance with the laws of the State of Texas,
               without regard to its conflict of law provisions. Any disputes arising from these Terms or
-              your use of the Site shall be resolved in the courts of Travis County, Texas.
+              your use of the Site shall be resolved in the courts of {SITE.county} County, Texas.
             </p>
           </section>
 
