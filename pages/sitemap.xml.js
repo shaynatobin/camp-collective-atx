@@ -1,7 +1,8 @@
 import { getAllCamps } from '../lib/airtable'
 import { slugify } from '../lib/utils'
+import { SITE } from '../lib/site'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://campcollectiveatx.com'
+const SITE_URL = SITE.url
 
 function generateSitemap(camps) {
   const staticPages = [

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Layout from '../components/Layout'
+import { SITE } from '../lib/site'
 
 const CATEGORIES = [
   'Arts & Creativity',
@@ -21,7 +22,7 @@ const CATEGORIES = [
   'Language Immersion',
 ]
 
-const CITIES = ['Austin', 'Round Rock', 'Cedar Park', 'Georgetown', 'Other']
+const CITIES = [...SITE.submitCities, 'Other']
 
 export default function SubmitACamp() {
   const [form, setForm] = useState({
@@ -49,14 +50,14 @@ export default function SubmitACamp() {
       if (!res.ok) throw new Error('Submission failed')
       setStatus('success')
     } catch {
-      setError('Something went wrong. Please try again or email us at hello@campcollectiveatx.com.')
+      setError(`Something went wrong. Please try again or email us at ${SITE.email}.`)
       setStatus('idle')
     }
   }
 
   if (status === 'success') {
     return (
-      <Layout title="Camp Submitted | Camp Collective ATX">
+      <Layout title={`Camp Submitted | ${SITE.name}`}>
         <div className="max-w-xl mx-auto px-4 py-20 text-center">
           <div className="text-5xl mb-4">🎉</div>
           <h1 className="font-display text-3xl font-bold text-brand-ink mb-3">Thanks for submitting!</h1>
@@ -73,8 +74,8 @@ export default function SubmitACamp() {
 
   return (
     <Layout
-      title="Submit a Camp | Camp Collective ATX"
-      description="Is your Austin summer camp missing from our directory? Submit it here and we'll add it within 2 business days."
+      title={`Submit a Camp | ${SITE.name}`}
+      description={`Is your ${SITE.metro} summer camp missing from our directory? Submit it here and we'll add it within 2 business days.`}
     >
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
         <h1 className="font-display text-3xl sm:text-4xl font-bold text-brand-ink mb-2">
@@ -96,7 +97,7 @@ export default function SubmitACamp() {
               value={form.name}
               onChange={handleChange}
               className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-coral text-brand-ink"
-              placeholder="e.g. Barton Springs Summer Camp"
+              placeholder={`e.g. ${SITE.exampleCampName}`}
             />
           </div>
 

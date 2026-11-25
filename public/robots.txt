@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://campcollectiveatx.com/sitemap.xml

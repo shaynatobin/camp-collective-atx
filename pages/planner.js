@@ -7,6 +7,7 @@ import Icon from '../components/Icon'
 import { getAllCamps } from '../lib/airtable'
 import { getCategoryGradient, getInitials, CATEGORY_LABELS } from '../lib/utils'
 import { PLANNER_YEAR, SUMMER_WEEKS, formatSessionDates } from '../lib/season'
+import { SITE } from '../lib/site'
 
 const STORAGE_KEY = `camp-planner-${PLANNER_YEAR}`
 const WEEKS = SUMMER_WEEKS
@@ -226,7 +227,7 @@ export default function PlannerPage({ camps }) {
 
   return (
     <Layout
-      title="Summer Planner | Camp Collective ATX"
+      title={`Summer Planner | ${SITE.name}`}
       description="Plan your family's entire summer camp schedule week by week. Add camps for each child and track your total cost."
     >
       {/* Page header */}

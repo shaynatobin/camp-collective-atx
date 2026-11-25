@@ -3,11 +3,12 @@ import CampCard from '../../components/CampCard'
 import Link from 'next/link'
 import { getAllCamps } from '../../lib/airtable'
 import { slugify } from '../../lib/utils'
+import { SITE } from '../../lib/site'
 
 export default function CityPage({ camps, cityName }) {
   return (
     <Layout
-      title={`Summer Camps in ${cityName}, TX | Camp Collective ATX`}
+      title={`Summer Camps in ${cityName}, TX | ${SITE.name}`}
       description={`Find summer camps in ${cityName}, TX. Browse ${camps.length} camps near ${cityName} for kids of all ages and interests.`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

@@ -1,3 +1,4 @@
+import { SITE } from '../../lib/site'
 const BASE_ID = process.env.AIRTABLE_BASE_ID || 'appnSbd15tWgR0ssk'
 const TABLE_ID = process.env.AIRTABLE_TABLE_ID || 'tblJu3iphW7Hkx76N'
 const API_URL = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`
@@ -23,9 +24,15 @@ export default async function handler(req, res) {
   }
 
   // Only include City if it's one of the confirmed valid values
-  const validCities = ['Austin', 'Round Rock', 'Cedar Park', 'Georgetown']
+  const validCities = SITE.submitCities
   if (validCities.includes(city)) {
     fields['City'] = city
+  }
+
+  // Tag non-Austin submissions with their metro. (Austin camps leave it blank,
+  // so this needs no Metro field in Airtable until a second site launches.)
+  if (SITE.metro !== 'Austin') {
+    fields['Metro'] = [SITE.metro]
   }
 
   if (url) fields['URL'] = url

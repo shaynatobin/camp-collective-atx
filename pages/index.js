@@ -7,6 +7,7 @@ import Icon, { CATEGORY_ICONS } from '../components/Icon'
 import { getAllCamps } from '../lib/airtable'
 import { FEATURED_CATEGORIES, CATEGORY_COLORS, categoryLabel } from '../lib/utils'
 import { PLANNER_YEAR } from '../lib/season'
+import { SITE } from '../lib/site'
 
 export default function Home({ camps }) {
   const [search, setSearch] = useState('')
@@ -25,8 +26,11 @@ export default function Home({ camps }) {
   }, [camps])
 
   const featured = useMemo(() => {
-    const withPhoto = camps.filter((c) => c.photo)
-    return (withPhoto.length >= 6 ? withPhoto : camps).slice(0, 6)
+    // Outside Austin, lead with the city's own camps, not ones shared with Austin.
+    const own = SITE.key === 'austin' ? camps : camps.filter((c) => !c.sharedMetro)
+    const pool = own.length >= 6 ? own : camps
+    const withPhoto = pool.filter((c) => c.photo)
+    return (withPhoto.length >= 6 ? withPhoto : pool).slice(0, 6)
   }, [camps])
 
   function handleSearch(e) {
@@ -44,10 +48,10 @@ export default function Home({ camps }) {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-brand-ink mb-4 leading-tight">
             Find Your Perfect<br />
-            <span className="text-brand-coral">Austin Summer Camp</span>
+            <span className="text-brand-coral">{SITE.metro} Summer Camp</span>
           </h1>
           <p className="text-lg sm:text-xl text-brand-ink-soft mb-10 max-w-2xl mx-auto">
-            {camps.length} camps across sports, arts, STEM, nature, and more, all in Greater Austin. Start planning summer {PLANNER_YEAR}.
+            {camps.length} camps across sports, arts, STEM, nature, and more, all in {SITE.area}. Start planning summer {PLANNER_YEAR}.
           </p>
 
           {/* Search bar */}
@@ -56,7 +60,7 @@ export default function Home({ camps }) {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Try soccer, coding, Round Rock..."
+              placeholder={`Try soccer, coding, ${SITE.exampleTown}...`}
               aria-label="Search camps"
               className="flex-grow min-w-0 px-4 py-3 rounded-xl border border-brand-border text-brand-ink placeholder-brand-ink-soft focus:outline-none focus:ring-2 focus:ring-brand-coral bg-white"
             />
@@ -114,7 +118,7 @@ export default function Home({ camps }) {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="flex items-center justify-between mb-8">
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-brand-ink">
-            Austin Favorites
+            {SITE.metro} Favorites
           </h2>
           <Link href="/camps" className="text-sm font-medium text-brand-coral hover:underline">
             View all camps →
@@ -131,10 +135,10 @@ export default function Home({ camps }) {
       <section className="bg-brand-forest-dark text-white py-14">
         <div className="max-w-2xl mx-auto px-4 text-center">
           <h2 className="font-display text-2xl sm:text-3xl font-bold mb-3">
-            Run a camp in Austin?
+            Run a camp in {SITE.metro}?
           </h2>
           <p className="text-white/70 mb-8">
-            Get your camp in front of Austin parents planning their summer. Listing is free.
+            Get your camp in front of {SITE.metro} parents planning their summer. Listing is free.
           </p>
           <Link
             href="/submit-a-camp"

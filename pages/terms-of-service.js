@@ -1,10 +1,11 @@
 import Layout from '../components/Layout'
+import { SITE } from '../lib/site'
 
 export default function TermsOfService() {
   return (
     <Layout
-      title="Terms of Service | Camp Collective ATX"
-      description="Terms of Service for Camp Collective ATX — the rules and policies governing use of our Austin summer camp directory."
+      title={`Terms of Service | ${SITE.name}`}
+      description={`Terms of Service for ${SITE.name} — the rules and policies governing use of our ${SITE.metro} summer camp directory.`}
     >
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-14">
         <h1 className="font-display text-3xl sm:text-4xl font-bold text-brand-ink mb-2">Terms of Service</h1>
@@ -15,22 +16,22 @@ export default function TermsOfService() {
           <section>
             <h2 className="font-display text-xl font-bold text-brand-ink mb-3">1. Acceptance of Terms</h2>
             <p>
-              By accessing or using <strong>campcollectiveatx.com</strong> (the "Site"), you agree to be
+              By accessing or using <strong>{SITE.domain}</strong> (the "Site"), you agree to be
               bound by these Terms of Service ("Terms"). If you do not agree to these Terms, please do not
               use the Site. These Terms apply to all visitors, users, and others who access or use the Site.
             </p>
           </section>
 
           <section>
-            <h2 className="font-display text-xl font-bold text-brand-ink mb-3">2. What Camp Collective ATX Is</h2>
+            <h2 className="font-display text-xl font-bold text-brand-ink mb-3">2. What {SITE.name} Is</h2>
             <p>
-              Camp Collective ATX is an independent online directory of summer camps in the Greater Austin,
+              {SITE.name} is an independent online directory of summer camps in the Greater {SITE.metro},
               Texas area. We are <strong>not</strong> affiliated with, endorsed by, employed by, or
               representing any camp listed on this Site. We are not a camp registration service, booking
               agent, or intermediary between parents and camps.
             </p>
             <p>
-              Our role is to help Austin parents discover camps. Registration, payment, and all other
+              Our role is to help {SITE.metro} parents discover camps. Registration, payment, and all other
               transactions occur directly between the parent and the camp.
             </p>
           </section>
@@ -45,7 +46,7 @@ export default function TermsOfService() {
             </p>
             <p>
               <strong>Always confirm details directly with the camp before registering your child.</strong>{' '}
-              Camp Collective ATX is not responsible for any errors, omissions, or outdated information in
+              {SITE.name} is not responsible for any errors, omissions, or outdated information in
               camp listings.
             </p>
           </section>
@@ -53,13 +54,13 @@ export default function TermsOfService() {
           <section>
             <h2 className="font-display text-xl font-bold text-brand-ink mb-3">4. No Endorsement or Vetting</h2>
             <p>
-              Listing on Camp Collective ATX does not constitute our endorsement, recommendation, approval,
+              Listing on {SITE.name} does not constitute our endorsement, recommendation, approval,
               or certification of any camp. We do not inspect, vet, license, certify, or investigate the
               camps listed on this Site. It is your responsibility to research and evaluate any camp before
               enrolling your child.
             </p>
             <p>
-              Camp Collective ATX is not liable for any experiences, outcomes, injuries, losses, or damages
+              {SITE.name} is not liable for any experiences, outcomes, injuries, losses, or damages
               arising from attendance at or interaction with any camp listed on this Site.
             </p>
           </section>
@@ -74,8 +75,8 @@ export default function TermsOfService() {
             <p>
               If you are a camp operator and wish to update, correct, or remove your camp's listing, please
               contact us at{' '}
-              <a href="mailto:hello@campcollectiveatx.com" className="text-brand-coral underline">
-                hello@campcollectiveatx.com
+              <a href={`mailto:${SITE.email}`} className="text-brand-coral underline">
+                {SITE.email}
               </a>
               .
             </p>
@@ -98,7 +99,7 @@ export default function TermsOfService() {
             <h2 className="font-display text-xl font-bold text-brand-ink mb-3">7. Intellectual Property</h2>
             <p>
               The original content on this Site — including our written descriptions, design, layout, and
-              code — is owned by Camp Collective ATX and protected by applicable copyright law. Camp names,
+              code — is owned by {SITE.name} and protected by applicable copyright law. Camp names,
               logos, and trademarks displayed on this Site belong to their respective owners.
             </p>
             <p>
@@ -130,7 +131,7 @@ export default function TermsOfService() {
           <section>
             <h2 className="font-display text-xl font-bold text-brand-ink mb-3">10. Limitation of Liability</h2>
             <p>
-              To the fullest extent permitted by law, Camp Collective ATX and its operators shall not be
+              To the fullest extent permitted by law, {SITE.name} and its operators shall not be
               liable for any indirect, incidental, special, consequential, or punitive damages, including
               but not limited to loss of data, loss of profits, or personal injury, arising out of your
               use of the Site or any camp listed on it.
@@ -151,7 +152,7 @@ export default function TermsOfService() {
             <p>
               These Terms are governed by and construed in accordance with the laws of the State of Texas,
               without regard to its conflict of law provisions. Any disputes arising from these Terms or
-              your use of the Site shall be resolved in the courts of Travis County, Texas.
+              your use of the Site shall be resolved in the courts of {SITE.county} County, Texas.
             </p>
           </section>
 
@@ -167,8 +168,8 @@ export default function TermsOfService() {
             <h2 className="font-display text-xl font-bold text-brand-ink mb-3">14. Contact</h2>
             <p>
               Questions about these Terms? Contact us at:{' '}
-              <a href="mailto:hello@campcollectiveatx.com" className="text-brand-coral underline">
-                hello@campcollectiveatx.com
+              <a href={`mailto:${SITE.email}`} className="text-brand-coral underline">
+                {SITE.email}
               </a>
             </p>
           </section>

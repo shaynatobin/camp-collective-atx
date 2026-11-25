@@ -1,4 +1,5 @@
 import { ImageResponse } from '@vercel/og'
+import { SITE } from '../../lib/site'
 
 export const config = {
   runtime: 'edge',
@@ -6,8 +7,8 @@ export const config = {
 
 export default function handler(req) {
   const { searchParams } = new URL(req.url)
-  const title = searchParams.get('title') || 'Camp Collective ATX'
-  const subtitle = searchParams.get('subtitle') || 'Find the perfect Austin summer camp for your kids'
+  const title = searchParams.get('title') || SITE.name
+  const subtitle = searchParams.get('subtitle') || `Find the perfect ${SITE.metro} summer camp for your kids`
 
   return new ImageResponse(
     (
@@ -52,11 +53,11 @@ export default function handler(req) {
           <span style={{ fontSize: 56, fontWeight: 900, color: '#1C1C1C', letterSpacing: '-1px' }}>
             Camp Collective
           </span>
-          <span style={{ fontSize: 48, fontWeight: 700, color: '#E8794A' }}>ATX</span>
+          <span style={{ fontSize: 48, fontWeight: 700, color: '#E8794A' }}>{SITE.short}</span>
         </div>
 
         {/* Title (page-specific) */}
-        {title !== 'Camp Collective ATX' && (
+        {title !== SITE.name && (
           <div style={{
             fontSize: 32, fontWeight: 700, color: '#1C1C1C',
             textAlign: 'center', marginBottom: 12, maxWidth: 900,
@@ -77,7 +78,7 @@ export default function handler(req) {
           position: 'absolute', bottom: 40, right: 60,
           fontSize: 20, color: '#999',
         }}>
-          campcollectiveatx.com
+          {SITE.domain}
         </div>
       </div>
     ),

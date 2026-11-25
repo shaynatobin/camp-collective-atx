@@ -6,6 +6,7 @@ import Icon from '../../components/Icon'
 import { getAllCamps } from '../../lib/airtable'
 import { categoryLabel, campAgeRange, campWeeklyPrice, latestHour } from '../../lib/utils'
 import { SUMMER_WEEKS, PLANNER_YEAR, campRunsDuringWeek } from '../../lib/season'
+import { SITE } from '../../lib/site'
 
 const SPORT_KEYWORDS = {
   'Soccer': ['soccer', 'futbol'],
@@ -263,19 +264,19 @@ export default function CampsPage({ camps }) {
 
   return (
     <Layout
-      title="Browse Austin Summer Camps | Camp Collective ATX"
-      description={`Browse ${camps.length} summer camps in Austin, TX and the greater area. Filter by age, area, price, aftercare and more for summer ${PLANNER_YEAR}.`}
+      title={`Browse ${SITE.metro} Summer Camps | ${SITE.name}`}
+      description={`Browse ${camps.length} summer camps in ${SITE.metro}, TX and the greater area. Filter by age, area, price, aftercare and more for summer ${PLANNER_YEAR}.`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Page header */}
         <div className="mb-8">
           <h1 className="font-display text-3xl sm:text-4xl font-bold text-brand-ink mb-2">
-            {sharedSlugs ? 'Shared Camp List' : 'Austin Summer Camps'}
+            {sharedSlugs ? 'Shared Camp List' : `${SITE.metro} Summer Camps`}
           </h1>
           <p className="text-gray-600">
             {sharedSlugs
               ? `Someone shared ${sharedSlugs.size} camp${sharedSlugs.size !== 1 ? 's' : ''} with you.`
-              : `${camps.length} camps across Greater Austin for summer ${PLANNER_YEAR}: sports, arts, STEM, nature, and more.`}
+              : `${camps.length} camps across ${SITE.area} for summer ${PLANNER_YEAR}: sports, arts, STEM, nature, and more.`}
           </p>
         </div>
 
