@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Layout from '../../components/Layout'
 import CampCard from '../../components/CampCard'
+import Icon from '../../components/Icon'
 import { getAllCamps } from '../../lib/airtable'
 import { categoryLabel, campAgeRange, campWeeklyPrice, latestHour } from '../../lib/utils'
 import { SUMMER_WEEKS, PLANNER_YEAR, campRunsDuringWeek } from '../../lib/season'
@@ -483,7 +484,7 @@ export default function CampsPage({ camps }) {
           </div>
         ) : (
           <div className="text-center py-20">
-            <div className="text-4xl mb-4">🔍</div>
+            <Icon name="search" className="w-10 h-10 mx-auto mb-4 text-brand-ink-soft" />
             <h3 className="font-display text-xl font-semibold text-brand-ink mb-2">No camps found</h3>
             <p className="text-gray-500 mb-6">Try adjusting your filters or search terms.</p>
             <button

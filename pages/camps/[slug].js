@@ -12,6 +12,7 @@ import { getCategoryGradient, truncate, categoryLabel, formatAges, formatWeeklyP
 import { outboundUrl, trackCampVisit } from '../../lib/outbound'
 import { formatSessionDates, seasonNote, PLANNER_YEAR } from '../../lib/season'
 import { usePlanner } from '../../lib/PlannerContext'
+import Icon from '../../components/Icon'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://campcollectiveatx.com'
 
@@ -235,9 +236,24 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
   const updateListingHref = `mailto:hello@campcollectiveatx.com?subject=${encodeURIComponent(`Update listing: ${camp.name}`)}`
   const note = seasonNote(camp)
 
+  // Highlights are often one line separated by semicolons; show each as its own bullet.
   const features = camp.specialFeatures
-    ? camp.specialFeatures.split('\n').filter((f) => f.trim())
+    ? camp.specialFeatures
+        .split(/\n|;|•/)
+        .map((f) => f.replace(/^\s*[-*]\s*/, '').trim())
+        .filter(Boolean)
     : []
+  const location = camp.city
+    ? `${camp.city}, TX${camp.region && camp.region !== camp.city ? ` · ${camp.region}` : ''}`
+    : ''
+  const glance = [
+    ages && { icon: 'ages', label: 'Ages', value: ages },
+    price && { icon: 'price', label: 'Price', value: price },
+    sessionDates && { icon: 'calendar', label: 'Dates', value: sessionDates },
+    hours && { icon: 'clock', label: 'Hours', value: hours },
+    camp.aftercare && { icon: 'moon', label: 'Aftercare', value: `Available${camp.latestPickup ? `, until ${camp.latestPickup}` : ''}` },
+    (fullAddress || location) && { icon: 'pin', label: 'Where', value: fullAddress || location },
+  ].filter(Boolean)
 
   return (
     <Layout title={pageTitle} description={pageDesc} ogImage={camp.photo} canonical={canonicalUrl}>
@@ -248,7 +264,7 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
         />
       </Head>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
         <nav className="text-sm text-gray-500 mb-6 flex items-center gap-1.5 flex-wrap">
           <Link href="/" className="hover:text-brand-coral">Home</Link>
@@ -283,36 +299,12 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
             {camp.name}
           </h1>
 
-          {/* Quick info */}
-          <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-            {camp.city && (
+          {/* Where and how it's rated; the rest is in the side card */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-brand-ink-soft">
+            {location && (
               <span className="flex items-center gap-1">
-                📍 {camp.city}, TX{camp.region && camp.region !== camp.city ? ` · ${camp.region}` : ''}
-              </span>
-            )}
-            {price && (
-              <span className="flex items-center gap-1">
-                💰 {price}
-              </span>
-            )}
-            {hours && (
-              <span className="flex items-center gap-1">
-                🕐 {hours}
-              </span>
-            )}
-            {ages && (
-              <span className="flex items-center gap-1">
-                👧 {ages}
-              </span>
-            )}
-            {sessionDates && (
-              <span className="flex items-center gap-1">
-                📅 {sessionDates}
-              </span>
-            )}
-            {camp.aftercare && (
-              <span className="flex items-center gap-1">
-                ⏰ Aftercare available{camp.latestPickup ? ` (until ${camp.latestPickup})` : ''}
+                <Icon name="pin" className="w-4 h-4 text-brand-forest" />
+                {location}
               </span>
             )}
             {avgRating && (
@@ -329,152 +321,186 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
           )}
         </div>
 
-        {/* Photo or gradient placeholder */}
-        {(() => {
-          if (!camp.photo || photoFailed) {
-            return (
-              <div className={`relative w-full h-64 sm:h-80 rounded-2xl overflow-hidden mb-8 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
-                <span className="text-white text-5xl font-display font-bold opacity-60">
-                  {camp.name.charAt(0)}
-                </span>
-              </div>
-            )
-          }
-          return (
-            <div className={`relative w-full h-64 sm:h-80 rounded-2xl overflow-hidden mb-8 ${camp.isLogo ? 'bg-brand-cream' : ''}`}>
-              <Image
-                src={camp.photo}
-                alt={camp.name}
-                fill
-                className={camp.isLogo ? 'object-contain p-8' : 'object-cover'}
-                sizes="(max-width: 768px) 100vw, 800px"
-                priority
-                onError={() => setPhotoFailed(true)}
-              />
-            </div>
-          )
-        })()}
-
-        {/* CTA buttons */}
-        <div className="flex flex-wrap gap-3 mb-10">
-          {camp.url && (
-            <a
-              href={outboundUrl(camp.url)}
-              target="_blank"
-              rel="noopener"
-              onClick={() => trackCampVisit(camp, 'camp page')}
-              className="px-6 py-3 bg-brand-coral text-white font-semibold rounded-xl hover:bg-opacity-90 transition-colors"
-            >
-              Visit Camp Website →
-            </a>
-          )}
-          <button
-            onClick={() => openAddModal(camp)}
-            className="px-6 py-3 bg-brand-forest text-white font-semibold rounded-xl hover:bg-brand-forest-dark transition-colors"
-          >
-            📅 Add to Planner
-          </button>
-          {camp.address && (
-            <a
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${camp.name}, ${fullAddress}`)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3 border border-gray-300 text-brand-ink font-medium rounded-xl hover:bg-gray-50 transition-colors"
-            >
-              View on Google Maps
-            </a>
-          )}
-        </div>
-
-        {/* Description */}
-        {camp.description && (
-          <div className="mb-8">
-            <h2 className="font-display text-xl font-bold text-brand-ink mb-3">About This Camp</h2>
-            <p className="text-gray-700 leading-relaxed">{camp.description}</p>
-          </div>
-        )}
-
-        {/* Special features */}
-        {features.length > 0 && (
-          <div className="mb-8 bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-            <h2 className="font-display text-xl font-bold text-brand-ink mb-4">Highlights</h2>
-            <ul className="space-y-2">
-              {features.map((feature, i) => (
-                <li key={i} className="flex items-start gap-2 text-gray-700">
-                  <span className="text-brand-forest font-bold mt-0.5">✓</span>
-                  <span>{feature.replace(/^[-•*]\s*/, '')}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Address */}
-        {camp.address && (
-          <div className="mb-4 text-sm text-gray-600">
-            <strong className="text-brand-ink">Address:</strong> {fullAddress}
-          </div>
-        )}
-
-        {/* For camp operators */}
-        <p className="mb-10 text-sm text-gray-500">
-          Is this your camp?{' '}
-          <a href={updateListingHref} className="text-brand-coral underline hover:text-brand-coral-dark">
-            Update your listing
-          </a>
-        </p>
-
-        {/* Reviews section */}
-        <div ref={reviewsSectionRef} className="mb-10 border-t border-gray-200 pt-10">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-display text-2xl font-bold text-brand-ink">
-              Parent Reviews
-              {reviews.length > 0 && (
-                <span className="ml-2 text-lg font-normal text-gray-500">({reviews.length})</span>
-              )}
-            </h2>
-            {!showForm && (
-              <button
-                onClick={() => setShowForm(true)}
-                className="text-sm font-medium text-brand-coral border border-brand-coral rounded-lg px-4 py-1.5 hover:bg-brand-coral hover:text-white transition-colors"
-              >
-                Write a Review
-              </button>
-            )}
-          </div>
-
-          {reviews.length > 0 ? (
-            <div className="space-y-6 mb-8">
-              {reviews.map((r) => (
-                <div key={r.id} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
-                  <div className="flex items-start justify-between gap-4 mb-2">
-                    <div>
-                      <p className="font-semibold text-brand-ink text-sm">{r.reviewerName}</p>
-                      <p className="text-xs text-gray-400">
-                        {[r.location, r.childAge && `Child age ${r.childAge}`, r.sessionYear && `Summer ${r.sessionYear}`].filter(Boolean).join(' · ')}
-                      </p>
-                    </div>
-                    <StarDisplay rating={r.rating} />
+        {/* Phone: photo, then the at-a-glance card, then details.
+            Desktop: details on the left, the card stays in view on the right. */}
+        <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-x-10 lg:gap-y-8">
+          {/* Photo, logo or placeholder */}
+          <div className="lg:col-start-1 lg:row-start-1">
+            {(() => {
+              if (!camp.photo || photoFailed) {
+                return (
+                  <div className={`relative w-full h-48 sm:h-56 rounded-2xl overflow-hidden bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+                    <span className="text-white text-5xl font-display font-bold opacity-60">
+                      {camp.name.charAt(0)}
+                    </span>
                   </div>
-                  <p className="text-gray-700 text-sm leading-relaxed">{r.review}</p>
+                )
+              }
+              if (camp.isLogo) {
+                return (
+                  <div className="relative w-full h-40 sm:h-48 rounded-2xl overflow-hidden bg-white border border-brand-border">
+                    <Image
+                      src={camp.photo}
+                      alt={camp.name}
+                      fill
+                      className="object-contain p-6 sm:p-8 [filter:drop-shadow(0_0_0.6px_rgba(38,36,31,0.55))]"
+                      sizes="(max-width: 1024px) 100vw, 760px"
+                      priority
+                      onError={() => setPhotoFailed(true)}
+                    />
+                  </div>
+                )
+              }
+              return (
+                <div className="relative w-full h-64 sm:h-80 rounded-2xl overflow-hidden">
+                  <Image
+                    src={camp.photo}
+                    alt={camp.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 760px"
+                    priority
+                    onError={() => setPhotoFailed(true)}
+                  />
                 </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-500 text-sm mb-6">No reviews yet — be the first to share your experience!</p>
-          )}
+              )
+            })()}
+          </div>
 
-          {showForm && (
-            <div className="bg-brand-cream rounded-xl p-6 border border-gray-200">
-              <h3 className="font-display text-lg font-bold text-brand-ink mb-4">Share Your Experience</h3>
-              <ReviewForm campId={camp.id} />
+          {/* At a glance */}
+          <aside className="lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:self-start lg:sticky lg:top-24">
+            <div className="bg-white rounded-2xl border border-brand-border shadow-sm p-5">
+              <h2 className="font-display text-lg font-bold text-brand-ink mb-4">At a glance</h2>
+              {glance.length > 0 && (
+                <dl className="space-y-3 mb-5">
+                  {glance.map((row) => (
+                    <div key={row.label} className="flex items-start gap-3">
+                      <span className="w-8 h-8 rounded-lg bg-brand-cream text-brand-forest flex items-center justify-center flex-shrink-0">
+                        <Icon name={row.icon} className="w-4 h-4" />
+                      </span>
+                      <div className="min-w-0">
+                        <dt className="text-xs text-brand-ink-soft">{row.label}</dt>
+                        <dd className="text-sm text-brand-ink break-words">{row.value}</dd>
+                      </div>
+                    </div>
+                  ))}
+                </dl>
+              )}
+              <div className="flex flex-col gap-2">
+                {camp.url && (
+                  <a
+                    href={outboundUrl(camp.url)}
+                    target="_blank"
+                    rel="noopener"
+                    onClick={() => trackCampVisit(camp, 'camp page')}
+                    className="px-5 py-2.5 text-center bg-brand-coral text-white font-semibold rounded-xl hover:bg-brand-coral-dark transition-colors"
+                  >
+                    Visit Camp Website →
+                  </a>
+                )}
+                <button
+                  onClick={() => openAddModal(camp)}
+                  className="px-5 py-2.5 bg-brand-forest text-white font-semibold rounded-xl hover:bg-brand-forest-dark transition-colors flex items-center justify-center gap-2"
+                >
+                  <Icon name="calendarPlus" className="w-4 h-4" />
+                  Add to Planner
+                </button>
+                {camp.address && (
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${camp.name}, ${fullAddress}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-5 py-2.5 text-center border border-brand-border text-brand-ink font-medium rounded-xl hover:bg-brand-paper transition-colors"
+                  >
+                    View on Google Maps
+                  </a>
+                )}
+              </div>
             </div>
-          )}
+            <p className="mt-3 text-xs text-brand-ink-soft text-center">
+              Is this your camp?{' '}
+              <a href={updateListingHref} className="text-brand-coral underline hover:text-brand-coral-dark">
+                Update your listing
+              </a>
+            </p>
+          </aside>
+
+          {/* Details */}
+          <div className="lg:col-start-1 lg:row-start-2 min-w-0">
+            {camp.description && (
+              <div className="mb-8">
+                <h2 className="font-display text-xl font-bold text-brand-ink mb-3">About This Camp</h2>
+                <p className="text-brand-ink leading-relaxed">{camp.description}</p>
+              </div>
+            )}
+
+            {features.length > 0 && (
+              <div className="mb-10 bg-white rounded-2xl p-6 border border-brand-border shadow-sm">
+                <h2 className="font-display text-xl font-bold text-brand-ink mb-4">Highlights</h2>
+                <ul className="space-y-2">
+                  {features.map((feature, i) => (
+                    <li key={i} className="flex items-start gap-2 text-brand-ink">
+                      <Icon name="check" className="w-4 h-4 text-brand-forest mt-1" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Reviews section */}
+            <div ref={reviewsSectionRef} className="mb-10 border-t border-brand-border pt-10 scroll-mt-24">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="font-display text-2xl font-bold text-brand-ink">
+                  Parent Reviews
+                  {reviews.length > 0 && (
+                    <span className="ml-2 text-lg font-normal text-gray-500">({reviews.length})</span>
+                  )}
+                </h2>
+                {!showForm && (
+                  <button
+                    onClick={() => setShowForm(true)}
+                    className="text-sm font-medium text-brand-coral border border-brand-coral rounded-lg px-4 py-1.5 hover:bg-brand-coral hover:text-white transition-colors"
+                  >
+                    Write a Review
+                  </button>
+                )}
+              </div>
+
+              {reviews.length > 0 ? (
+                <div className="space-y-6 mb-8">
+                  {reviews.map((r) => (
+                    <div key={r.id} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+                      <div className="flex items-start justify-between gap-4 mb-2">
+                        <div>
+                          <p className="font-semibold text-brand-ink text-sm">{r.reviewerName}</p>
+                          <p className="text-xs text-gray-400">
+                            {[r.location, r.childAge && `Child age ${r.childAge}`, r.sessionYear && `Summer ${r.sessionYear}`].filter(Boolean).join(' · ')}
+                          </p>
+                        </div>
+                        <StarDisplay rating={r.rating} />
+                      </div>
+                      <p className="text-gray-700 text-sm leading-relaxed">{r.review}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-sm mb-6">No reviews yet — be the first to share your experience!</p>
+              )}
+
+              {showForm && (
+                <div className="bg-brand-cream rounded-xl p-6 border border-gray-200">
+                  <h3 className="font-display text-lg font-bold text-brand-ink mb-4">Share Your Experience</h3>
+                  <ReviewForm campId={camp.id} />
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Related camps */}
         {relatedCamps.length > 0 && (
-          <div className="border-t border-gray-200 pt-10">
+          <div className="border-t border-brand-border pt-10 mt-2">
             <h2 className="font-display text-2xl font-bold text-brand-ink mb-6">
               More {categoryLabel(camp.category)} Camps
             </h2>

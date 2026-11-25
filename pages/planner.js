@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import Image from 'next/image'
 import Link from 'next/link'
 import Layout from '../components/Layout'
+import Icon from '../components/Icon'
 import { getAllCamps } from '../lib/airtable'
 import { getCategoryGradient, getInitials, CATEGORY_LABELS } from '../lib/utils'
 import { PLANNER_YEAR, SUMMER_WEEKS, formatSessionDates } from '../lib/season'
@@ -274,14 +275,14 @@ export default function PlannerPage({ camps }) {
         {hasCamps && (
           <div className="max-w-7xl mx-auto bg-white rounded-2xl border border-brand-border shadow-sm px-6 py-4 mb-6 flex flex-wrap gap-8 items-center">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-brand-forest/10 flex items-center justify-center text-brand-forest text-lg">📅</div>
+              <div className="w-9 h-9 rounded-xl bg-brand-forest/10 flex items-center justify-center text-brand-forest"><Icon name="calendar" className="w-5 h-5" /></div>
               <div>
                 <p className="text-xs text-brand-ink-soft font-medium">Weeks planned</p>
                 <p className="font-bold text-brand-ink text-xl leading-tight">{totalWeeks}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-brand-coral/10 flex items-center justify-center text-brand-coral text-lg">🏕️</div>
+              <div className="w-9 h-9 rounded-xl bg-brand-coral/10 flex items-center justify-center text-brand-coral"><Icon name="nature" className="w-5 h-5" /></div>
               <div>
                 <p className="text-xs text-brand-ink-soft font-medium">Camps added</p>
                 <p className="font-bold text-brand-ink text-xl leading-tight">{Object.keys(slots).length}</p>
@@ -289,7 +290,7 @@ export default function PlannerPage({ camps }) {
             </div>
             {costSummary.total > 0 && (
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-brand-sun/30 flex items-center justify-center text-brand-ink text-lg">💰</div>
+                <div className="w-9 h-9 rounded-xl bg-brand-sun/30 flex items-center justify-center text-brand-ink"><Icon name="price" className="w-5 h-5" /></div>
                 <div>
                   <p className="text-xs text-brand-ink-soft font-medium">Est. weekly cost</p>
                   <p className="font-bold text-brand-coral text-xl leading-tight">${costSummary.total.toLocaleString()}</p>
@@ -410,7 +411,7 @@ export default function PlannerPage({ camps }) {
         {/* Empty state */}
         {!hasCamps && loaded && (
           <div className="max-w-7xl mx-auto text-center py-10">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-brand-cream text-3xl mb-4">🏕️</div>
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-brand-cream text-brand-forest mb-4"><Icon name="nature" className="w-8 h-8" /></div>
             <p className="text-brand-ink-soft text-sm font-medium">Click any <span className="font-bold text-brand-coral">+</span> to add a camp to that week.</p>
             <Link href="/camps" className="mt-3 inline-block text-sm text-brand-coral hover:underline font-medium">
               Browse camps →
@@ -491,7 +492,7 @@ export default function PlannerPage({ camps }) {
               ))}
               {filteredCamps.length === 0 && (
                 <div className="text-center py-16">
-                  <p className="text-2xl mb-2">🔍</p>
+                  <Icon name="search" className="w-7 h-7 mx-auto mb-2 text-brand-ink-soft" />
                   <p className="text-brand-ink-soft text-sm">No camps found.</p>
                 </div>
               )}

@@ -2,8 +2,10 @@ import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import Layout from '../components/Layout'
 import CampCard from '../components/CampCard'
+import HeroScene from '../components/HeroScene'
+import Icon, { CATEGORY_ICONS } from '../components/Icon'
 import { getAllCamps } from '../lib/airtable'
-import { FEATURED_CATEGORIES, categoryLabel } from '../lib/utils'
+import { FEATURED_CATEGORIES, CATEGORY_COLORS, categoryLabel } from '../lib/utils'
 import { PLANNER_YEAR } from '../lib/season'
 
 export default function Home({ camps }) {
@@ -14,6 +16,12 @@ export default function Home({ camps }) {
     const cats = [...new Set(camps.map((c) => c.category).filter(Boolean))]
       .sort((a, b) => categoryLabel(a).localeCompare(categoryLabel(b)))
     return cats
+  }, [camps])
+
+  const categoryCounts = useMemo(() => {
+    const counts = {}
+    for (const c of camps) if (c.category) counts[c.category] = (counts[c.category] || 0) + 1
+    return counts
   }, [camps])
 
   const featured = useMemo(() => {
@@ -30,9 +38,9 @@ export default function Home({ camps }) {
   }
 
   return (
-    <Layout>
+    <Layout flushFooter>
       {/* Hero */}
-      <section className="bg-brand-cream py-16 sm:py-24 border-b border-brand-border">
+      <section className="bg-brand-cream pt-14 sm:pt-20 overflow-hidden">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-brand-ink mb-4 leading-tight">
             Find Your Perfect<br />
@@ -70,6 +78,8 @@ export default function Home({ camps }) {
             </button>
           </form>
         </div>
+        {/* Hill Country illustration along the bottom of the hero */}
+        <HeroScene className="block w-full h-36 sm:h-auto sm:max-h-[300px] mt-6 sm:mt-4" />
       </section>
 
       {/* Category grid */}
@@ -82,32 +92,21 @@ export default function Home({ camps }) {
             <Link
               key={cat.slug}
               href={`/category/${cat.slug}`}
-              className="bg-white rounded-2xl p-5 text-center shadow-sm hover:shadow-md transition-shadow border border-brand-border group"
+              className="bg-white rounded-2xl p-5 text-center shadow-sm hover:shadow-md transition-shadow border border-brand-border group flex flex-col items-center"
             >
-              <div className="text-3xl mb-2">{cat.emoji}</div>
-              <div className="text-sm font-medium text-brand-ink group-hover:text-brand-coral transition-colors">
+              <span className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${CATEGORY_COLORS[cat.name] || 'bg-brand-cream text-brand-forest'}`}>
+                <Icon name={CATEGORY_ICONS[cat.name] || 'dayCamp'} className="w-6 h-6" />
+              </span>
+              <span className="text-sm font-medium text-brand-ink group-hover:text-brand-coral transition-colors">
                 {categoryLabel(cat.name)}
-              </div>
+              </span>
+              {categoryCounts[cat.name] > 0 && (
+                <span className="text-xs text-brand-ink-soft mt-0.5">
+                  {categoryCounts[cat.name]} camp{categoryCounts[cat.name] !== 1 ? 's' : ''}
+                </span>
+              )}
             </Link>
           ))}
-        </div>
-      </section>
-
-      {/* Stats bar */}
-      <section className="bg-brand-forest bg-opacity-10 border-y border-brand-forest border-opacity-20 py-8">
-        <div className="max-w-4xl mx-auto px-4 grid grid-cols-3 gap-4 text-center">
-          <div>
-            <div className="font-display text-3xl font-bold text-brand-coral">{camps.length}</div>
-            <div className="text-sm text-brand-ink-soft mt-1">Camps Listed</div>
-          </div>
-          <div>
-            <div className="font-display text-3xl font-bold text-brand-coral">{categories.length}</div>
-            <div className="text-sm text-brand-ink-soft mt-1">Categories</div>
-          </div>
-          <div>
-            <div className="font-display text-3xl font-bold text-brand-coral">ATX</div>
-            <div className="text-sm text-brand-ink-soft mt-1">Greater Austin</div>
-          </div>
         </div>
       </section>
 
