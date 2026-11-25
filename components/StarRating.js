@@ -25,6 +25,7 @@ export function StarInput({ value, onChange }) {
           onClick={() => onChange(star)}
           className="focus:outline-none"
           aria-label={`${star} star${star !== 1 ? 's' : ''}`}
+          aria-pressed={star === value}
         >
           <svg
             className={`w-8 h-8 transition-colors ${star <= value ? 'text-brand-sun' : 'text-gray-300 hover:text-brand-sun'}`}

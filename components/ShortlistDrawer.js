@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { useShortlist } from '../lib/ShortlistContext'
 import { getCategoryGradient, getInitials, categoryLabel, formatAges, formatWeeklyPrice } from '../lib/utils'
 import { formatSessionDates } from '../lib/season'
+import { outboundUrl, trackCampVisit } from '../lib/outbound'
 
 function CampThumb({ camp }) {
   const gradient = getCategoryGradient(camp.category)
@@ -66,7 +67,7 @@ function CompareView({ camps, onBack }) {
               {camps.map((c) => (
                 <td key={c.id} className="py-3 px-2">
                   {c.url && (
-                    <a href={c.url} target="_blank" rel="noopener noreferrer"
+                    <a href={outboundUrl(c.url)} target="_blank" rel="noopener" onClick={() => trackCampVisit(c, 'compare')}
                       className="text-xs font-medium text-white bg-brand-coral rounded-lg px-3 py-1.5 hover:bg-brand-coral-dark transition-colors">
                       Visit Site →
                     </a>

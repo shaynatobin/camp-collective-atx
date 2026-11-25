@@ -48,7 +48,8 @@ export default function Home({ camps }) {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name..."
+              placeholder="Try soccer, coding, Round Rock..."
+              aria-label="Search camps"
               className="flex-grow min-w-0 px-4 py-3 rounded-xl border border-brand-border text-brand-ink placeholder-brand-ink-soft focus:outline-none focus:ring-2 focus:ring-brand-coral bg-white"
             />
             <select

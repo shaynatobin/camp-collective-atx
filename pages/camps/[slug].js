@@ -8,7 +8,8 @@ import CampCard from '../../components/CampCard'
 import CategoryBadge from '../../components/CategoryBadge'
 import { StarDisplay, StarInput } from '../../components/StarRating'
 import { getAllCamps, getReviewsForCamp } from '../../lib/airtable'
-import { getCategoryGradient, truncate, categoryLabel, formatAges, formatWeeklyPrice } from '../../lib/utils'
+import { getCategoryGradient, truncate, categoryLabel, formatAges, formatWeeklyPrice, campAgeRange } from '../../lib/utils'
+import { outboundUrl, trackCampVisit } from '../../lib/outbound'
 import { formatSessionDates, seasonNote, PLANNER_YEAR } from '../../lib/season'
 import { usePlanner } from '../../lib/PlannerContext'
 
@@ -57,27 +58,29 @@ function ReviewForm({ campId }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 relative">
-      <div>
-        <label className="block text-sm font-medium text-brand-ink mb-1">Your Rating *</label>
+      <div role="group" aria-labelledby="review-rating-label">
+        <p id="review-rating-label" className="block text-sm font-medium text-brand-ink mb-1">Your Rating *</p>
         <StarInput value={form.rating} onChange={(r) => setForm({ ...form, rating: r })} />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-brand-ink mb-1">Your Name *</label>
+          <label htmlFor="review-name" className="block text-sm font-medium text-brand-ink mb-1">Your Name *</label>
           <input
             type="text"
             required
             placeholder="e.g. Sarah M."
+            id="review-name"
             value={form.reviewerName}
             onChange={(e) => setForm({ ...form, reviewerName: e.target.value })}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-coral"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-brand-ink mb-1">Child's Age <span className="text-gray-400 font-normal">(optional)</span></label>
+          <label htmlFor="review-child-age" className="block text-sm font-medium text-brand-ink mb-1">Child's Age <span className="text-gray-400 font-normal">(optional)</span></label>
           <input
             type="text"
             placeholder="e.g. 8"
+            id="review-child-age"
             value={form.childAge}
             onChange={(e) => setForm({ ...form, childAge: e.target.value })}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-coral"
@@ -85,12 +88,13 @@ function ReviewForm({ campId }) {
         </div>
       </div>
       <div>
-        <label className="block text-sm font-medium text-brand-ink mb-1">Your Email *</label>
+        <label htmlFor="review-email" className="block text-sm font-medium text-brand-ink mb-1">Your Email *</label>
         <input
           type="email"
           required
           placeholder="you@example.com"
-          value={form.reviewerEmail}
+          id="review-email"
+            value={form.reviewerEmail}
           onChange={(e) => setForm({ ...form, reviewerEmail: e.target.value })}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-coral"
         />
@@ -111,20 +115,22 @@ function ReviewForm({ campId }) {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-brand-ink mb-1">Session Year <span className="text-gray-400 font-normal">(optional)</span></label>
+          <label htmlFor="review-session-year" className="block text-sm font-medium text-brand-ink mb-1">Session Year <span className="text-gray-400 font-normal">(optional)</span></label>
           <input
             type="text"
             placeholder={`e.g. ${PLANNER_YEAR - 1}`}
+            id="review-session-year"
             value={form.sessionYear}
             onChange={(e) => setForm({ ...form, sessionYear: e.target.value })}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-coral"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-brand-ink mb-1">Your Location <span className="text-gray-400 font-normal">(optional)</span></label>
+          <label htmlFor="review-location" className="block text-sm font-medium text-brand-ink mb-1">Your Location <span className="text-gray-400 font-normal">(optional)</span></label>
           <input
             type="text"
             placeholder="e.g. Round Rock"
+            id="review-location"
             value={form.location}
             onChange={(e) => setForm({ ...form, location: e.target.value })}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-coral"
@@ -132,19 +138,20 @@ function ReviewForm({ campId }) {
         </div>
       </div>
       <div>
-        <label className="block text-sm font-medium text-brand-ink mb-1">Your Review *</label>
+        <label htmlFor="review-text" className="block text-sm font-medium text-brand-ink mb-1">Your Review *</label>
         <textarea
           required
           minLength={20}
           maxLength={3000}
           rows={4}
           placeholder="Tell other parents what you and your child loved (or didn't) about this camp..."
+          id="review-text"
           value={form.review}
           onChange={(e) => setForm({ ...form, review: e.target.value })}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-coral resize-none"
         />
       </div>
-      {errorMsg && <p className="text-sm text-red-600">{errorMsg}</p>}
+      {errorMsg && <p role="alert" className="text-sm text-red-600">{errorMsg}</p>}
       <button
         type="submit"
         disabled={submitting}
@@ -214,7 +221,18 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
   const ages = formatAges(camp)
   const price = formatWeeklyPrice(camp) || camp.priceRange
   const sessionDates = formatSessionDates(camp) || (camp.season && !seasonNote(camp) ? `Summer ${camp.season}` : '')
-  const hours = camp.dayStart && camp.latestPickup ? `${camp.dayStart} – ${camp.latestPickup}` : camp.hours
+  const hours = camp.dayStart && camp.latestPickup
+    ? `${camp.dayStart} – ${camp.latestPickup}`
+    : (/facility/i.test(camp.hours || '') ? '' : camp.hours)
+  // Some addresses already include the city, state and ZIP; don't repeat them.
+  const addressHasCity = !!camp.address && (
+    /\bTX\b|\bTexas\b|\d{5}/i.test(camp.address) ||
+    (camp.city && camp.address.toLowerCase().includes(camp.city.toLowerCase()))
+  )
+  const fullAddress = camp.address
+    ? (addressHasCity || !camp.city ? camp.address : `${camp.address}, ${camp.city}, TX`)
+    : ''
+  const updateListingHref = `mailto:hello@campcollectiveatx.com?subject=${encodeURIComponent(`Update listing: ${camp.name}`)}`
   const note = seasonNote(camp)
 
   const features = camp.specialFeatures
@@ -341,9 +359,10 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
         <div className="flex flex-wrap gap-3 mb-10">
           {camp.url && (
             <a
-              href={camp.url}
+              href={outboundUrl(camp.url)}
               target="_blank"
-              rel="noopener noreferrer"
+              rel="noopener"
+              onClick={() => trackCampVisit(camp, 'camp page')}
               className="px-6 py-3 bg-brand-coral text-white font-semibold rounded-xl hover:bg-opacity-90 transition-colors"
             >
               Visit Camp Website →
@@ -357,7 +376,7 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
           </button>
           {camp.address && (
             <a
-              href={`https://www.google.com/maps/search/${encodeURIComponent(camp.address + ' ' + camp.city + ' TX')}`}
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${camp.name}, ${fullAddress}`)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="px-6 py-3 border border-gray-300 text-brand-ink font-medium rounded-xl hover:bg-gray-50 transition-colors"
@@ -392,10 +411,18 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
 
         {/* Address */}
         {camp.address && (
-          <div className="mb-10 text-sm text-gray-600">
-            <strong className="text-brand-ink">Address:</strong> {camp.address}{camp.city ? `, ${camp.city}, TX` : ''}
+          <div className="mb-4 text-sm text-gray-600">
+            <strong className="text-brand-ink">Address:</strong> {fullAddress}
           </div>
         )}
+
+        {/* For camp operators */}
+        <p className="mb-10 text-sm text-gray-500">
+          Is this your camp?{' '}
+          <a href={updateListingHref} className="text-brand-coral underline hover:text-brand-coral-dark">
+            Update your listing
+          </a>
+        </p>
 
         {/* Reviews section */}
         <div ref={reviewsSectionRef} className="mb-10 border-t border-gray-200 pt-10">
@@ -471,6 +498,26 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
   )
 }
 
+// Same category first, then favor camps in the same area and overlapping ages.
+function pickRelatedCamps(camp, camps) {
+  const ages = campAgeRange(camp)
+  const score = (c) => {
+    let n = 0
+    if (camp.region && c.region === camp.region) n += 3
+    if (camp.city && c.city === camp.city) n += 2
+    const r = campAgeRange(c)
+    if (ages && r && r.min <= ages.max && r.max >= ages.min) n += 2
+    if (c.photo) n += 1
+    return n
+  }
+  return camps
+    .filter((c) => c.id !== camp.id && c.category === camp.category)
+    .map((c) => ({ c, n: score(c) }))
+    .sort((a, b) => b.n - a.n || a.c.name.localeCompare(b.c.name))
+    .slice(0, 3)
+    .map(({ c }) => c)
+}
+
 export async function getStaticPaths() {
   return {
     paths: [],
@@ -485,7 +532,7 @@ export async function getStaticProps({ params }) {
   if (!camp) return { notFound: true }
 
   const [relatedCamps, reviews] = await Promise.all([
-    Promise.resolve(camps.filter((c) => c.id !== camp.id && c.category === camp.category).slice(0, 3)),
+    Promise.resolve(pickRelatedCamps(camp, camps)),
     getReviewsForCamp(camp.id),
   ])
 

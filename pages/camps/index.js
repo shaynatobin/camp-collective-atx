@@ -96,15 +96,49 @@ export default function CampsPage({ camps }) {
   const [age2, setAge2] = useState('')
   const [sort, setSort] = useState('az')
   const [sportFilter, setSportFilter] = useState('All')
+  const [urlLoaded, setUrlLoaded] = useState(false)
 
-  // The home page search sends ?q= and ?category= here.
+  // Filters live in the address (?q=soccer&age1=8...), so the back button,
+  // a refresh or a shared link brings back the same results.
   useEffect(() => {
     if (!router.isReady) return
-    const { q, category: cat, region: reg } = router.query
-    if (typeof q === 'string') setSearch(q)
-    if (typeof cat === 'string') setCategory(cat)
-    if (typeof reg === 'string') setRegion(reg)
+    const q = router.query
+    const str = (k) => (typeof q[k] === 'string' ? q[k] : '')
+    const on = (k) => q[k] === '1'
+    setSearch(str('q'))
+    setCategory(str('category'))
+    setRegion(str('region'))
+    setCity(str('city'))
+    setCampType(str('type'))
+    setWeek(str('week'))
+    setMaxPrice(str('price'))
+    setAge1(str('age1'))
+    setAge2(str('age2'))
+    setSort(str('sort') || 'az')
+    setSportFilter(str('sport') || 'All')
+    setFullDayOnly(on('fullday'))
+    setAftercareOnly(on('aftercare'))
+    setFinancialAidOnly(on('aid'))
+    setMealsOnly(on('meals'))
+    setTransportOnly(on('bus'))
+    setUrlLoaded(true)
   }, [router.isReady]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!urlLoaded) return
+    const params = {
+      q: search.trim(), category, region, city, type: campType, week, price: maxPrice,
+      age1, age2, sort: sort !== 'az' ? sort : '', sport: sportFilter !== 'All' ? sportFilter : '',
+      fullday: fullDayOnly ? '1' : '', aftercare: aftercareOnly ? '1' : '', aid: financialAidOnly ? '1' : '',
+      meals: mealsOnly ? '1' : '', bus: transportOnly ? '1' : '',
+      shortlist: typeof router.query.shortlist === 'string' ? router.query.shortlist : '',
+    }
+    const query = Object.fromEntries(Object.entries(params).filter(([, v]) => v !== ''))
+    const t = setTimeout(() => {
+      router.replace({ pathname: router.pathname, query }, undefined, { shallow: true, scroll: false })
+    }, 300)
+    return () => clearTimeout(t)
+  }, [urlLoaded, search, category, region, city, campType, week, maxPrice, age1, age2, sort, sportFilter, fullDayOnly, aftercareOnly, financialAidOnly, mealsOnly, transportOnly]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const regions = useMemo(() => {
     return [...new Set(camps.map((c) => c.region).filter(Boolean))].sort()
@@ -130,13 +164,21 @@ export default function CampsPage({ camps }) {
     const a1 = age1 ? parseInt(age1) : null
     const a2 = age2 ? parseInt(age2) : null
 
-    const q = search.trim().toLowerCase()
+    const words = search.trim().toLowerCase().split(/\s+/).filter(Boolean)
     const cap = maxPrice ? parseInt(maxPrice, 10) : null
     const weekObj = week !== '' ? SUMMER_WEEKS[parseInt(week, 10)] : null
 
     return camps.filter((camp) => {
       if (sharedSlugs && !sharedSlugs.has(camp.slug)) return false
-      if (q && !`${camp.name} ${camp.city} ${camp.region}`.toLowerCase().includes(q)) return false
+      if (words.length) {
+        // Search the name, place, category, description and highlights; every word must match.
+        const text = [
+          camp.name, camp.city, camp.region, categoryLabel(camp.category), camp.campType,
+          camp.description, camp.specialFeatures,
+          camp.category === 'Sports & Athletics' ? detectSport(camp) : '',
+        ].join(' ').toLowerCase()
+        if (!words.every((w) => text.includes(w))) return false
+      }
       if (region && camp.region !== region) return false
       if (weekObj && campRunsDuringWeek(camp, weekObj) !== true) return false
       if (cap !== null) {
@@ -252,7 +294,7 @@ export default function CampsPage({ camps }) {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name or area..."
+              placeholder="Search camps, activities or towns..."
               aria-label="Search camps"
               className="px-3 py-2.5 rounded-lg border border-gray-300 text-sm text-brand-ink placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-coral"
             />

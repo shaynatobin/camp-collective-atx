@@ -15,7 +15,7 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="font-display text-xl font-bold text-brand-ink mb-3">1. Introduction</h2>
             <p>
-              Camp Collective ATX ("we," "us," or "our") is operated by Shane and Shayna Tobin in Austin, Texas.
+              Camp Collective ATX ("we," "us," or "our") is run by the Camp Collective team in Austin, Texas.
               This Privacy Policy explains how we collect, use, and protect information when you visit{' '}
               <strong>campcollectiveatx.com</strong> (the "Site").
             </p>
@@ -97,8 +97,8 @@ export default function PrivacyPolicy() {
               This Site is directed at parents and adults seeking summer camp information for their children.
               We do not knowingly collect personal information from children under the age of 13. If you
               believe that a child under 13 has submitted personal information to us, please contact us at{' '}
-              <a href="mailto:shayna.tobin@gmail.com" className="text-brand-coral underline">
-                shayna.tobin@gmail.com
+              <a href="mailto:hello@campcollectiveatx.com" className="text-brand-coral underline">
+                hello@campcollectiveatx.com
               </a>{' '}
               and we will promptly delete it.
             </p>
@@ -117,8 +117,8 @@ export default function PrivacyPolicy() {
             </ul>
             <p className="mt-3">
               To exercise any of these rights, please contact us at{' '}
-              <a href="mailto:shayna.tobin@gmail.com" className="text-brand-coral underline">
-                shayna.tobin@gmail.com
+              <a href="mailto:hello@campcollectiveatx.com" className="text-brand-coral underline">
+                hello@campcollectiveatx.com
               </a>
               . We will respond within 45 days.
             </p>
@@ -155,8 +155,8 @@ export default function PrivacyPolicy() {
             <h2 className="font-display text-xl font-bold text-brand-ink mb-3">11. Contact Us</h2>
             <p>
               Questions about this Privacy Policy? Contact us at:{' '}
-              <a href="mailto:shayna.tobin@gmail.com" className="text-brand-coral underline">
-                shayna.tobin@gmail.com
+              <a href="mailto:hello@campcollectiveatx.com" className="text-brand-coral underline">
+                hello@campcollectiveatx.com
               </a>
             </p>
           </section>

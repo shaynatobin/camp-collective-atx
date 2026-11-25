@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import { useRouter } from 'next/router'
 import Header from './Header'
 import Footer from './Footer'
 import ShortlistDrawer from './ShortlistDrawer'
@@ -12,7 +13,11 @@ export default function Layout({ children, title, description, ogImage, canonica
   const pageTitle = title || DEFAULT_TITLE
   const pageDesc = description || DEFAULT_DESCRIPTION
   const pageImage = ogImage || `${SITE_URL}/api/og?title=${encodeURIComponent(pageTitle)}`
-  const canonicalUrl = canonical || SITE_URL
+  const router = useRouter()
+  // Each page points search engines at its own address (without filters or anchors),
+  // so browse, category and town pages aren't treated as copies of the home page.
+  const path = (router?.asPath || '/').split(/[?#]/)[0]
+  const canonicalUrl = canonical || `${SITE_URL}${path === '/' ? '' : path}`
 
   return (
     <>
@@ -37,7 +42,7 @@ export default function Layout({ children, title, description, ogImage, canonica
         <meta name="twitter:image" content={pageImage} />
 
         <meta name="google-site-verification" content="n2UeOJNS1eWt7GpW0eV_yLFYXd-p6TvB_ZFOQ0Ikcxk" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </Head>
 
       <div className="min-h-screen flex flex-col bg-brand-paper">
