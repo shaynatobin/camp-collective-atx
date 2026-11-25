@@ -1,8 +1,9 @@
 import Link from 'next/link'
 
-export default function Footer() {
+// flush: no gap above the footer, for pages that end in a full-width band.
+export default function Footer({ flush = false }) {
   return (
-    <footer className="bg-brand-forest-dark text-white mt-16">
+    <footer className={`bg-brand-forest-dark text-white ${flush ? 'border-t border-white/10' : 'mt-16'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}

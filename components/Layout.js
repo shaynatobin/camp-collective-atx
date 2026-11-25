@@ -9,7 +9,7 @@ const DEFAULT_DESCRIPTION =
   'Find the right summer camp in Austin, TX. Browse hundreds of camps in sports, arts, STEM, nature, and more across Greater Austin, filtered by age, area, price and aftercare.'
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://campcollectiveatx.com'
 
-export default function Layout({ children, title, description, ogImage, canonical }) {
+export default function Layout({ children, title, description, ogImage, canonical, flushFooter = false }) {
   const pageTitle = title || DEFAULT_TITLE
   const pageDesc = description || DEFAULT_DESCRIPTION
   const pageImage = ogImage || `${SITE_URL}/api/og?title=${encodeURIComponent(pageTitle)}`
@@ -48,7 +48,7 @@ export default function Layout({ children, title, description, ogImage, canonica
       <div className="min-h-screen flex flex-col bg-brand-paper">
         <Header />
         <main className="flex-grow">{children}</main>
-        <Footer />
+        <Footer flush={flushFooter} />
         <ShortlistDrawer />
       </div>
     </>

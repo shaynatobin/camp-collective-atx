@@ -8,6 +8,7 @@ import { getInitials, getCategoryGradient, formatAges, formatWeeklyPrice } from 
 import { seasonNote } from '../lib/season'
 import { StarDisplay } from './StarRating'
 import { outboundUrl, trackCampVisit } from '../lib/outbound'
+import Icon from './Icon'
 
 export default function CampCard({ camp }) {
   const gradient = getCategoryGradient(camp.category)
@@ -18,18 +19,22 @@ export default function CampCard({ camp }) {
   const ages = formatAges(camp)
   const price = formatWeeklyPrice(camp) || camp.priceRange
   const note = seasonNote(camp)
-  const metaParts = [camp.city ? `📍 ${camp.city}, TX` : null, ages, price].filter(Boolean)
+  const metaParts = [
+    camp.city && { icon: 'pin', text: `${camp.city}, TX` },
+    ages && { icon: 'ages', text: ages },
+    price && { icon: 'price', text: price },
+  ].filter(Boolean)
 
   return (
     <article className="relative bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col h-full group">
-      {/* Image area */}
-      <div className="relative w-full h-44 flex-shrink-0 bg-brand-cream">
+      {/* Image area: logos sit on white with a hairline outline, so white logos still show */}
+      <div className={`relative w-full h-44 flex-shrink-0 ${camp.photo && !imgFailed ? (camp.isLogo ? 'bg-white border-b border-brand-border' : 'bg-brand-cream') : ''}`}>
         {camp.photo && !imgFailed ? (
           <Image
             src={camp.photo}
             alt={camp.name}
             fill
-            className="object-contain p-3"
+            className={camp.isLogo ? 'object-contain p-6 [filter:drop-shadow(0_0_0.6px_rgba(38,36,31,0.55))]' : 'object-cover'}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             onError={() => setImgFailed(true)}
           />
@@ -40,37 +45,36 @@ export default function CampCard({ camp }) {
             </span>
           </div>
         )}
-
-        {/* Action buttons */}
-        <div className="absolute top-2 right-2 z-10 flex flex-col items-end gap-1.5">
-          <button
-            onClick={() => toggle(camp)}
-            className={`h-8 px-2.5 rounded-full flex items-center gap-1 shadow text-xs font-medium transition-colors duration-150 ${
-              saved ? 'bg-brand-coral text-white' : 'bg-white text-brand-ink-soft hover:text-brand-coral'
-            }`}
-            aria-pressed={saved}
-            aria-label={saved ? `Remove ${camp.name} from your saved camps` : `Save ${camp.name} to compare later`}
-            title={saved ? 'Remove from saved camps' : 'Save to compare later'}
-          >
-            <span aria-hidden="true">{saved ? '♥' : '♡'}</span>
-            {saved ? 'Saved' : 'Save'}
-          </button>
-          <button
-            onClick={() => openAddModal(camp)}
-            className="h-8 px-2.5 rounded-full bg-white flex items-center gap-1 shadow text-xs font-medium text-brand-ink-soft hover:text-brand-forest transition-colors duration-150"
-            aria-label={`Add ${camp.name} to a week in your summer planner`}
-            title="Add to a week in your summer planner"
-          >
-            <span aria-hidden="true">📅</span>
-            Plan
-          </button>
-        </div>
       </div>
 
       {/* Card body */}
       <div className="p-4 flex flex-col flex-grow">
-        <div className="mb-2">
+        {/* Category and the Save / Plan buttons share a row, so nothing covers the logo */}
+        <div className="relative z-10 flex items-center justify-between gap-2 mb-2">
           <CategoryBadge category={camp.category} />
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => toggle(camp)}
+              className={`w-8 h-8 rounded-full flex items-center justify-center border transition-colors duration-150 ${
+                saved
+                  ? 'bg-brand-coral border-brand-coral text-white'
+                  : 'bg-white border-brand-border text-brand-ink-soft hover:text-brand-coral hover:border-brand-coral'
+              }`}
+              aria-pressed={saved}
+              aria-label={saved ? `Remove ${camp.name} from your saved camps` : `Save ${camp.name} to compare later`}
+              title={saved ? 'Remove from saved camps' : 'Save to compare later'}
+            >
+              <Icon name="heart" filled={saved} />
+            </button>
+            <button
+              onClick={() => openAddModal(camp)}
+              className="w-8 h-8 rounded-full bg-white border border-brand-border flex items-center justify-center text-brand-ink-soft hover:text-brand-forest hover:border-brand-forest transition-colors duration-150"
+              aria-label={`Add ${camp.name} to a week in your summer planner`}
+              title="Add to a week in your summer planner"
+            >
+              <Icon name="calendarPlus" />
+            </button>
+          </div>
         </div>
 
         <h3 className="font-display font-semibold text-brand-ink text-lg leading-snug mb-1 line-clamp-2">
@@ -92,11 +96,11 @@ export default function CampCard({ camp }) {
         )}
 
         {metaParts.length > 0 && (
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-brand-ink-soft mb-2">
-            {metaParts.map((part, i) => (
-              <span key={i} className="flex items-center gap-x-2">
-                {i > 0 && <span aria-hidden="true">·</span>}
-                <span>{part}</span>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-brand-ink-soft mb-2">
+            {metaParts.map((part) => (
+              <span key={part.icon} className="flex items-center gap-1">
+                <Icon name={part.icon} className="w-3.5 h-3.5 text-brand-forest" />
+                <span>{part.text}</span>
               </span>
             ))}
           </div>
