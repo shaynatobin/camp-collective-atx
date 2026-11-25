@@ -32,7 +32,7 @@ export default async function handler(req, res) {
   // Tag non-Austin submissions with their metro. (Austin camps leave it blank,
   // so this needs no Metro field in Airtable until a second site launches.)
   if (SITE.metro !== 'Austin') {
-    fields['Metro'] = SITE.metro
+    fields['Metro'] = [SITE.metro]
   }
 
   if (url) fields['URL'] = url
