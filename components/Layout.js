@@ -3,11 +3,12 @@ import { useRouter } from 'next/router'
 import Header from './Header'
 import Footer from './Footer'
 import ShortlistDrawer from './ShortlistDrawer'
+import { SITE } from '../lib/site'
 
-const DEFAULT_TITLE = 'Camp Collective ATX | Austin Summer Camp Directory'
+const DEFAULT_TITLE = `${SITE.name} | ${SITE.metro} Summer Camp Directory`
 const DEFAULT_DESCRIPTION =
-  'Find the right summer camp in Austin, TX. Browse hundreds of camps in sports, arts, STEM, nature, and more across Greater Austin, filtered by age, area, price and aftercare.'
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://campcollectiveatx.com'
+  `Find the right summer camp in ${SITE.metro}, TX. Browse hundreds of camps in sports, arts, STEM, nature, and more across ${SITE.area}, filtered by age, area, price and aftercare.`
+const SITE_URL = SITE.url
 
 export default function Layout({ children, title, description, ogImage, canonical, flushFooter = false }) {
   const pageTitle = title || DEFAULT_TITLE
@@ -33,7 +34,7 @@ export default function Layout({ children, title, description, ogImage, canonica
         <meta property="og:image" content={pageImage} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:site_name" content="Camp Collective ATX" />
+        <meta property="og:site_name" content={SITE.name} />
 
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />

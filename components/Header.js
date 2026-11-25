@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { SITE } from '../lib/site'
 
 function LogoMark({ size = 40 }) {
   const s = size / 40
@@ -62,7 +63,7 @@ export default function Header() {
           <Link href="/" className="flex items-center gap-2.5">
             <LogoMark size={40} />
             <span className="font-display font-semibold text-xl text-brand-ink leading-none">
-              Camp Collective<span className="text-brand-coral"> ATX</span>
+              Camp Collective<span className="text-brand-coral"> {SITE.short}</span>
             </span>
           </Link>
 

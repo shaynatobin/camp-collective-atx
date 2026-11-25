@@ -4,6 +4,7 @@ import CampCard from '../../components/CampCard'
 import Link from 'next/link'
 import { getAllCamps } from '../../lib/airtable'
 import { slugify, CATEGORY_LABELS } from '../../lib/utils'
+import { SITE } from '../../lib/site'
 
 const SPORT_KEYWORDS = {
   'Soccer': ['soccer', 'futbol', 'fútbol'],
@@ -58,8 +59,8 @@ export default function CategoryPage({ camps, categoryName }) {
 
   return (
     <Layout
-      title={`${displayName} Camps in Austin TX | Camp Collective ATX`}
-      description={`Find the best ${displayName} summer camps in Austin, TX. Browse ${camps.length} camps for kids across Greater Austin.`}
+      title={`${displayName} Camps in ${SITE.metro} TX | ${SITE.name}`}
+      description={`Find the best ${displayName} summer camps in ${SITE.metro}, TX. Browse ${camps.length} camps for kids across ${SITE.area}.`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <nav className="text-sm text-gray-500 mb-6">
@@ -71,10 +72,10 @@ export default function CategoryPage({ camps, categoryName }) {
         </nav>
 
         <h1 className="font-display text-3xl sm:text-4xl font-bold text-brand-ink mb-2">
-          {displayName} Camps in Austin
+          {displayName} Camps in {SITE.metro}
         </h1>
         <p className="text-gray-600 mb-6">
-          {visibleCamps.length} camp{visibleCamps.length !== 1 ? 's' : ''} found in Greater Austin.
+          {visibleCamps.length} camp{visibleCamps.length !== 1 ? 's' : ''} found in {SITE.area}.
         </p>
 
         {/* Sport sub-filters */}

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { SITE } from '../lib/site'
 
 // flush: no gap above the footer, for pages that end in a full-width band.
 export default function Footer({ flush = false }) {
@@ -9,10 +10,10 @@ export default function Footer({ flush = false }) {
           {/* Brand */}
           <div>
             <p className="font-display font-semibold text-lg mb-2">
-              Camp Collective <span className="text-brand-coral">ATX</span>
+              Camp Collective <span className="text-brand-coral">{SITE.short}</span>
             </p>
             <p className="text-sm text-white/60 leading-relaxed">
-              The definitive summer camp directory for Austin, TX and the surrounding area.
+              The definitive summer camp directory for {SITE.metro}, TX and the surrounding area.
             </p>
           </div>
 
@@ -53,7 +54,7 @@ export default function Footer({ flush = false }) {
         </div>
 
         <div className="mt-10 pt-6 border-t border-white/10 text-center text-xs text-white/40">
-          © {new Date().getFullYear()} Camp Collective ATX. All rights reserved. Built by Austin parents, for Austin parents.
+          © {new Date().getFullYear()} {SITE.name}. All rights reserved. Built by {SITE.metro} parents, for {SITE.metro} parents.
         </div>
       </div>
     </footer>

@@ -13,8 +13,9 @@ import { outboundUrl, trackCampVisit } from '../../lib/outbound'
 import { formatSessionDates, seasonNote, PLANNER_YEAR } from '../../lib/season'
 import { usePlanner } from '../../lib/PlannerContext'
 import Icon from '../../components/Icon'
+import { SITE } from '../../lib/site'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://campcollectiveatx.com'
+const SITE_URL = SITE.url
 
 function ReviewForm({ campId }) {
   const [form, setForm] = useState({ reviewerName: '', reviewerEmail: '', childAge: '', sessionYear: '', location: '', rating: 0, review: '', website: '' })
@@ -184,8 +185,8 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
   if (!camp) return null
 
   const gradient = getCategoryGradient(camp.category)
-  const pageTitle = `${camp.name} | Austin Summer Camp | Camp Collective ATX`
-  const pageDesc = truncate(camp.description || `${camp.name} is a summer camp in ${camp.city || 'Austin'}, TX.`, 160)
+  const pageTitle = `${camp.name} | ${SITE.metro} Summer Camp | ${SITE.name}`
+  const pageDesc = truncate(camp.description || `${camp.name} is a summer camp in ${camp.city || SITE.metro}, TX.`, 160)
   const canonicalUrl = `${SITE_URL}/camps/${camp.slug}`
 
   const avgRating = reviews.length
@@ -203,7 +204,7 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
       ? {
           '@type': 'PostalAddress',
           streetAddress: camp.address,
-          addressLocality: camp.city || 'Austin',
+          addressLocality: camp.city || SITE.metro,
           addressRegion: 'TX',
           addressCountry: 'US',
         }
@@ -233,7 +234,7 @@ export default function CampPage({ camp, relatedCamps, reviews }) {
   const fullAddress = camp.address
     ? (addressHasCity || !camp.city ? camp.address : `${camp.address}, ${camp.city}, TX`)
     : ''
-  const updateListingHref = `mailto:hello@campcollectiveatx.com?subject=${encodeURIComponent(`Update listing: ${camp.name}`)}`
+  const updateListingHref = `mailto:${SITE.email}?subject=${encodeURIComponent(`Update listing: ${camp.name}`)}`
   const note = seasonNote(camp)
 
   // Highlights are often one line separated by semicolons; show each as its own bullet.

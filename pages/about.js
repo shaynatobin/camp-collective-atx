@@ -1,27 +1,28 @@
 import Link from 'next/link'
 import Layout from '../components/Layout'
+import { SITE } from '../lib/site'
 
 export default function About() {
   return (
     <Layout
-      title="About Camp Collective ATX | Built by Austin Parents"
-      description="Camp Collective ATX is a summer camp directory built by Austin parents, for Austin parents. Our mission is to make finding the perfect Austin summer camp effortless."
+      title={`About ${SITE.name} | Built by ${SITE.metro} Parents`}
+      description={`${SITE.name} is a summer camp directory built by ${SITE.metro} parents, for ${SITE.metro} parents. Our mission is to make finding the perfect ${SITE.metro} summer camp effortless.`}
     >
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-14">
         <h1 className="font-display text-4xl font-bold text-brand-ink mb-4">
-          Built by Austin Parents,<br />
-          <span className="text-brand-coral">for Austin Parents.</span>
+          Built by {SITE.metro} Parents,<br />
+          <span className="text-brand-coral">for {SITE.metro} Parents.</span>
         </h1>
 
         <div className="prose prose-lg text-gray-700 space-y-6">
           <p>
-            We're the Camp Collective team, a group of Austin parents who spent way too many hours
+            We're the Camp Collective team, a group of {SITE.metro} parents who spent way too many hours
             across way too many browser tabs trying to find the right summer camp for our kids. We kept running into
-            the same problem: there was no single place to see everything Austin had to offer.
+            the same problem: there was no single place to see everything {SITE.metro} had to offer.
           </p>
           <p>
-            Camp Collective ATX is the directory we wished had existed. Our goal is simple: every summer
-            camp in the Austin metro should be findable here, organized clearly, and easy to compare —
+            {SITE.name} is the directory we wished had existed. Our goal is simple: every summer
+            camp in the {SITE.metro} metro should be findable here, organized clearly, and easy to compare —
             so you can spend less time searching and more time actually enjoying summer with your family.
           </p>
 
@@ -42,7 +43,7 @@ export default function About() {
             ))}
           </div>
 
-          <h2 className="font-display text-2xl font-bold text-brand-ink pt-4">Run a camp in Austin?</h2>
+          <h2 className="font-display text-2xl font-bold text-brand-ink pt-4">Run a camp in {SITE.metro}?</h2>
           <p>
             If your camp isn't listed — or if you'd like to update your information — we'd love to hear
             from you. Listings are free.
