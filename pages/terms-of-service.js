@@ -74,8 +74,8 @@ export default function TermsOfService() {
             <p>
               If you are a camp operator and wish to update, correct, or remove your camp's listing, please
               contact us at{' '}
-              <a href="mailto:shayna.tobin@gmail.com" className="text-brand-coral underline">
-                shayna.tobin@gmail.com
+              <a href="mailto:hello@campcollectiveatx.com" className="text-brand-coral underline">
+                hello@campcollectiveatx.com
               </a>
               .
             </p>
@@ -167,8 +167,8 @@ export default function TermsOfService() {
             <h2 className="font-display text-xl font-bold text-brand-ink mb-3">14. Contact</h2>
             <p>
               Questions about these Terms? Contact us at:{' '}
-              <a href="mailto:shayna.tobin@gmail.com" className="text-brand-coral underline">
-                shayna.tobin@gmail.com
+              <a href="mailto:hello@campcollectiveatx.com" className="text-brand-coral underline">
+                hello@campcollectiveatx.com
               </a>
             </p>
           </section>

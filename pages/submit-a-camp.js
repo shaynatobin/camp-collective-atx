@@ -49,7 +49,7 @@ export default function SubmitACamp() {
       if (!res.ok) throw new Error('Submission failed')
       setStatus('success')
     } catch {
-      setError('Something went wrong. Please try again or email us at shayna.tobin@gmail.com.')
+      setError('Something went wrong. Please try again or email us at hello@campcollectiveatx.com.')
       setStatus('idle')
     }
   }

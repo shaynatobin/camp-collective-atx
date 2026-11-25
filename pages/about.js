@@ -15,8 +15,8 @@ export default function About() {
 
         <div className="prose prose-lg text-gray-700 space-y-6">
           <p>
-            We're Shane and Shayna Tobin — Austin parents who spent way too many hours across way too
-            many browser tabs trying to find the right summer camp for our kids. We kept running into
+            We're the Camp Collective team, a group of Austin parents who spent way too many hours
+            across way too many browser tabs trying to find the right summer camp for our kids. We kept running into
             the same problem: there was no single place to see everything Austin had to offer.
           </p>
           <p>

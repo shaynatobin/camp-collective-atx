@@ -93,7 +93,9 @@ export default function Header() {
           <button
             className="md:hidden p-2 rounded-lg text-brand-ink hover:bg-brand-cream"
             onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Toggle menu"
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
           >
             {menuOpen ? (
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,7 +112,7 @@ export default function Header() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="md:hidden border-t border-brand-border bg-brand-paper px-4 py-3 space-y-2">
+        <div id="mobile-menu" className="md:hidden border-t border-brand-border bg-brand-paper px-4 py-3 space-y-2">
           {navLinks.map((link) => (
             <Link
               key={link.href}
